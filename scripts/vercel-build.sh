@@ -1,6 +1,11 @@
 #!/bin/bash
 set -e
 
+# Flutter refuses to run as root — Vercel builds as root, so spoof USER
+export USER=vercel
+export HOME=/tmp/flutter-home
+mkdir -p "$HOME"
+
 FLUTTER_VERSION="3.24.5"
 FLUTTER_DIR="/tmp/flutter"
 FLUTTER_URL="https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz"
@@ -13,9 +18,6 @@ tar xf /tmp/flutter.tar.xz -C /tmp
 rm /tmp/flutter.tar.xz
 
 export PATH="$PATH:${FLUTTER_DIR}/bin"
-
-echo "==> Flutter version:"
-flutter --version --no-version-check
 
 echo "==> Enabling web..."
 flutter config --no-analytics --enable-web
