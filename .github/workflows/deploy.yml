@@ -4,41 +4,33 @@ on:
   push:
     branches: [master]
 
-concurrency:
-  group: deploy-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  # ── Flutter Web → Vercel ────────────────────────────────────────────────────
   deploy-frontend:
     name: Flutter Web → Vercel
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
-      - name: Install Flutter (git clone — no Google Storage download)
+      - name: Install Flutter (stable branch)
         run: |
           git clone https://github.com/flutter/flutter.git \
-            --branch 3.24.5 --depth 1 /opt/flutter
+            --branch stable --depth 1 /opt/flutter
           echo "/opt/flutter/bin" >> "$GITHUB_PATH"
 
-      - name: Bootstrap Flutter web
+      - name: Configure Flutter
         run: |
           flutter config --no-analytics --enable-web
-          flutter precache --web --no-android --no-ios --no-macos --no-linux --no-windows
           flutter --version
 
-      - name: Install pub dependencies
+      - name: pub get
         run: flutter pub get
         working-directory: app
 
-      - name: Build Flutter web
+      - name: Build web
         working-directory: app
         run: |
-          flutter build web \
-            --release \
-            --web-renderer html \
+          flutter build web --release --web-renderer html \
             "--dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }}" \
             "--dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" \
             "--dart-define=API_BASE_URL=${{ secrets.API_BASE_URL }}"
@@ -58,18 +50,13 @@ jobs:
             > .vercel/project.json
           vercel deploy --prebuilt --prod --yes --token="$VERCEL_TOKEN"
 
-  # ── FastAPI → Railway (non-blocking) ────────────────────────────────────────
   deploy-backend:
     name: FastAPI → Railway
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     continue-on-error: true
-
     steps:
-      - uses: actions/checkout@v4
-
+      - uses: actions/checkout@v3
       - name: Deploy to Railway
-        run: |
-          npm install -g @railway/cli@latest
-          railway up --detach
+        run: npm install -g @railway/cli@latest && railway up --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
