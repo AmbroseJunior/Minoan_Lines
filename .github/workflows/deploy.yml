@@ -9,7 +9,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # ── Flutter Web → Vercel (pre-built, no Vercel build step) ──────────────────
+  # ── Flutter Web → Vercel ────────────────────────────────────────────────────
   deploy-frontend:
     name: Flutter Web → Vercel
     runs-on: ubuntu-latest
@@ -17,55 +17,63 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: subosito/flutter-action@v2
+      - name: Setup Flutter (stable)
+        uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.5'
           channel: 'stable'
           cache: true
 
+      - name: Flutter version
+        run: flutter --version
+
       - name: Install dependencies
-        run: cd app && flutter pub get
+        working-directory: app
+        run: flutter pub get
 
       - name: Build Flutter web
+        working-directory: app
         run: |
-          cd app
           flutter build web \
             --release \
             --web-renderer html \
-            --dart-define=SUPABASE_URL="${{ secrets.SUPABASE_URL }}" \
-            --dart-define=SUPABASE_ANON_KEY="${{ secrets.SUPABASE_ANON_KEY }}" \
-            --dart-define=API_BASE_URL="${{ secrets.API_BASE_URL }}"
+            "--dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }}" \
+            "--dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" \
+            "--dart-define=API_BASE_URL=${{ secrets.API_BASE_URL }}"
 
-      - name: Package for Vercel Build Output API
+      - name: Verify build output exists
         run: |
-          mkdir -p .vercel/output/static
-          cp -r app/build/web/. .vercel/output/static/
-          cat > .vercel/output/config.json << 'EOF'
-          {
-            "version": 3,
-            "routes": [
-              { "handle": "filesystem" },
-              { "src": "/(.*)", "dest": "/index.html" }
-            ]
-          }
-          EOF
+          echo "Files in app/build/web:"
+          ls -la app/build/web/
 
-      - name: Deploy to Vercel
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Prepare Vercel output
         env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
-          npm install -g vercel@latest
-          # Link CLI to the correct Vercel project
-          mkdir -p .vercel
-          printf '{"orgId":"%s","projectId":"%s"}' "$VERCEL_ORG_ID" "$VERCEL_PROJECT_ID" > .vercel/project.json
-          vercel deploy --prebuilt --prod --yes --token="$VERCEL_TOKEN"
+          mkdir -p .vercel/output/static
+          cp -r app/build/web/. .vercel/output/static/
+          printf '{"version":3,"routes":[{"handle":"filesystem"},{"src":"/(.*)","dest":"/index.html"}]}' \
+            > .vercel/output/config.json
+          printf '{"orgId":"%s","projectId":"%s"}' "$VERCEL_ORG_ID" "$VERCEL_PROJECT_ID" \
+            > .vercel/project.json
+          echo "=== .vercel/project.json ==="
+          cat .vercel/project.json
+          echo "=== .vercel/output/config.json ==="
+          cat .vercel/output/config.json
+          echo "=== static file count ==="
+          ls .vercel/output/static/ | wc -l
+
+      - name: Deploy to Vercel
+        run: vercel deploy --prebuilt --prod --yes --token="${{ secrets.VERCEL_TOKEN }}"
 
   # ── FastAPI → Railway ────────────────────────────────────────────────────────
   deploy-backend:
     name: FastAPI → Railway
     runs-on: ubuntu-latest
+    continue-on-error: true
 
     steps:
       - uses: actions/checkout@v4
