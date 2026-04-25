@@ -48,14 +48,17 @@ app = FastAPI(
 attach_rate_limiter(app)
 
 # ── CORS ─────────────────────────────────────────────────────────────────────
-app.add_middleware(
-    CORSMiddleware,
+_cors_kwargs: dict = dict(
     allow_origins=settings.cors_origins,
-    allow_origin_regex=settings.cors_origin_regex,
-    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+if settings.cors_origin_regex:
+    _cors_kwargs["allow_origin_regex"] = settings.cors_origin_regex
+# allow_credentials cannot be True when allow_origins=["*"]
+if settings.cors_origins != ["*"]:
+    _cors_kwargs["allow_credentials"] = True
+app.add_middleware(CORSMiddleware, **_cors_kwargs)
 
 
 # ── Global error handler ─────────────────────────────────────────────────────

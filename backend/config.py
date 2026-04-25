@@ -41,14 +41,8 @@ class Settings(BaseSettings):
     # ── App ───────────────────────────────────────────────────────────────────
     environment: str = "development"
     log_level: str = "INFO"
-    cors_origins: List[str] = [
-        "http://localhost:3000",
-        "http://localhost:8080",
-        "https://minoan-lines.vercel.app",
-        "https://minoan-lines-git-master-ambrosejuniors-projects.vercel.app",
-        "https://minoanlines-production.up.railway.app",
-    ]
-    cors_origin_regex: str = r"https://.*\.vercel\.app"
+    cors_origins: List[str] = ["*"]
+    cors_origin_regex: str = ""
 
     # ── Report storage ─────────────────────────────────────────────────────────
     report_storage_bucket: str = "compliance-reports"

@@ -35,6 +35,8 @@ jobs:
           API_BASE_URL: ${{ secrets.API_BASE_URL }}
         run: |
           API_URL="${API_BASE_URL:-https://minoanlines-production.up.railway.app}"
+          echo ">>> API_BASE_URL secret present: $([ -n "$API_BASE_URL" ] && echo YES || echo NO)"
+          echo ">>> Building with API_URL=${API_URL}"
           flutter build web --release \
             "--dart-define=SUPABASE_URL=${SUPABASE_URL}" \
             "--dart-define=SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}" \
