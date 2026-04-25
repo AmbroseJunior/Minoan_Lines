@@ -2,42 +2,64 @@ name: Deploy
 
 on:
   push:
-    branches: [main]
+    branches: [master]
 
 concurrency:
   group: deploy-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  # ──────────────────────────────────────────────────────────────────────────
-  # 1. Trigger Vercel deployment (Vercel builds Flutter via scripts/vercel-build.sh)
-  # ──────────────────────────────────────────────────────────────────────────
-  deploy-flutter-web:
+  # ── Flutter Web → Vercel (pre-built, no Vercel build step) ──────────────────
+  deploy-frontend:
     name: Flutter Web → Vercel
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Trigger Vercel production deployment
-        run: |
-          curl -fsSL -X POST \
-            "https://api.vercel.com/v13/deployments" \
-            -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "name": "minoan-lines",
-              "gitSource": {
-                "type": "github",
-                "repoId": "${{ github.event.repository.id }}",
-                "ref": "${{ github.ref_name }}"
-              },
-              "target": "production"
-            }'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.5'
+          channel: 'stable'
+          cache: true
 
-  # ──────────────────────────────────────────────────────────────────────────
-  # 2. Deploy FastAPI backend to Railway
-  # ──────────────────────────────────────────────────────────────────────────
+      - name: Install dependencies
+        run: cd app && flutter pub get
+
+      - name: Build Flutter web
+        run: |
+          cd app
+          flutter build web \
+            --release \
+            --web-renderer html \
+            --dart-define=SUPABASE_URL="${{ secrets.SUPABASE_URL }}" \
+            --dart-define=SUPABASE_ANON_KEY="${{ secrets.SUPABASE_ANON_KEY }}" \
+            --dart-define=API_BASE_URL="${{ secrets.API_BASE_URL }}"
+
+      - name: Package for Vercel Build Output API
+        run: |
+          mkdir -p .vercel/output/static
+          cp -r app/build/web/. .vercel/output/static/
+          cat > .vercel/output/config.json << 'EOF'
+          {
+            "version": 3,
+            "routes": [
+              { "handle": "filesystem" },
+              { "src": "/(.*)", "dest": "/index.html" }
+            ]
+          }
+          EOF
+
+      - name: Deploy to Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          npm install -g vercel@latest
+          vercel deploy --prebuilt --prod --yes
+
+  # ── FastAPI → Railway ────────────────────────────────────────────────────────
   deploy-backend:
     name: FastAPI → Railway
     runs-on: ubuntu-latest
