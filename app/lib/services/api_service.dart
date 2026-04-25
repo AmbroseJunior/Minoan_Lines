@@ -12,8 +12,8 @@ class ApiService {
   static final ApiService instance = ApiService._();
 
   static String get _resolvedBaseUrl {
-    final url = AppConfig.apiBaseUrl;
-    return (url.isEmpty) ? 'http://localhost:8000' : url;
+    const url = AppConfig.apiBaseUrl;
+    return url.isNotEmpty ? url : 'https://minoanlines-production.up.railway.app';
   }
 
   late final Dio _dio = Dio(BaseOptions(

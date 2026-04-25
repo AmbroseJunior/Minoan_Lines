@@ -12,7 +12,7 @@ class AppConfig {
       String.fromEnvironment('SUPABASE_ANON_KEY', defaultValue: '');
 
   static const String apiBaseUrl =
-      String.fromEnvironment('API_BASE_URL', defaultValue: 'http://localhost:8000');
+      String.fromEnvironment('API_BASE_URL', defaultValue: 'https://minoanlines-production.up.railway.app');
 
   static const String appName    = 'Minoan AI Platform';
   static const String appVersion = '1.0.0';
