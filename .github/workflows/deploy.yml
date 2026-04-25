@@ -17,9 +17,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Flutter (stable)
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.24.5'
           channel: 'stable'
           cache: true
 
@@ -79,10 +80,10 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install Railway CLI
-        run: npm install -g @railway/cli
+        run: npm install -g @railway/cli@latest
 
       - name: Deploy to Railway
-        run: railway up --service minoan-api --detach
-        working-directory: backend
+        run: railway up --detach
+        working-directory: .
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
