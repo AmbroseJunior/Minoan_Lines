@@ -17,17 +17,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Flutter 3.24.5
+      - name: Install Flutter (git clone — no Google Storage download)
         run: |
-          curl -fsSL \
-            "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.24.5-stable.tar.xz" \
-            -o /tmp/flutter.tar.xz
-          tar xf /tmp/flutter.tar.xz -C "$HOME"
-          echo "$HOME/flutter/bin" >> "$GITHUB_PATH"
+          git clone https://github.com/flutter/flutter.git \
+            --branch 3.24.5 --depth 1 /opt/flutter
+          echo "/opt/flutter/bin" >> "$GITHUB_PATH"
 
-      - name: Configure Flutter for web
+      - name: Bootstrap Flutter web
         run: |
           flutter config --no-analytics --enable-web
+          flutter precache --web --no-android --no-ios --no-macos --no-linux --no-windows
           flutter --version
 
       - name: Install pub dependencies
@@ -44,15 +43,13 @@ jobs:
             "--dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" \
             "--dart-define=API_BASE_URL=${{ secrets.API_BASE_URL }}"
 
-      - name: Install Vercel CLI
-        run: npm install -g vercel@latest
-
       - name: Deploy to Vercel
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
+          npm install -g vercel@latest
           mkdir -p .vercel/output/static
           cp -r app/build/web/. .vercel/output/static/
           printf '{"version":3,"routes":[{"handle":"filesystem"},{"src":"/(.*)","dest":"/index.html"}]}' \
