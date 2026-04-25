@@ -21,7 +21,7 @@ class AppConfig {
   static const String aiModel    = 'deepseek-chat';
 
   static const List<String> vessels = [
-    'Knossos Palace', 'Festos Palace', 'Knossos', 'Festos',
-    'Olympia Palace', 'Ikarus Palace', 'Europa Palace', 'Ariadne',
+    'Knossos Palace', 'Festos Palace', 'Mykonos Palace', 'Kydon Palace',
+    'Santorini Palace', 'Europa Palace', 'Cruise Olympia', 'Cruise Europa',
   ];
 }

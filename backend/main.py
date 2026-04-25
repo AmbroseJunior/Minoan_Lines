@@ -127,7 +127,7 @@ app.include_router(analytics.router)
 async def root():
     return {
         "platform": "Minoan Lines AI Platform",
-        "powered_by": "IntegraMind AI × Anthropic Claude",
+        "powered_by": "IntegraMind AI × DeepSeek AI",
         "docs": "/docs",
         "modules": {
             "vessel_ops": "/vessels",

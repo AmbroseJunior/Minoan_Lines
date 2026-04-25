@@ -44,6 +44,7 @@ class Settings(BaseSettings):
     cors_origins: List[str] = [
         "http://localhost:3000",
         "http://localhost:8080",
+        "https://minoan-lines.vercel.app",
         "https://minoan-lines-git-master-ambrosejuniors-projects.vercel.app",
     ]
 
