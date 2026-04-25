@@ -5,21 +5,22 @@ Central configuration — all settings loaded from environment variables.
 from functools import lru_cache
 from typing import List
 
-import anthropic
+from openai import AsyncOpenAI
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    # ── Anthropic ──────────────────────────────────────────────────────────────
-    anthropic_api_key: str
-    anthropic_model: str = "claude-sonnet-4-20250514"
+    # ── DeepSeek ──────────────────────────────────────────────────────────────
+    deepseek_api_key: str
+    deepseek_model: str = "deepseek-chat"
+    deepseek_base_url: str = "https://api.deepseek.com"
 
     # ── Supabase ───────────────────────────────────────────────────────────────
     supabase_url: str
-    supabase_anon_key: str
-    supabase_service_role_key: str  # server-side only — never expose to client
+    supabase_anon_key: str = ""
+    supabase_service_role_key: str
 
     # ── AIS ───────────────────────────────────────────────────────────────────
     ais_api_key: str = ""
@@ -37,11 +38,6 @@ class Settings(BaseSettings):
     # ── Slack ─────────────────────────────────────────────────────────────────
     slack_webhook_url: str = ""
 
-    # ── Auth ──────────────────────────────────────────────────────────────────
-    jwt_secret_key: str = "change-me-in-production"
-    jwt_algorithm: str = "HS256"
-    jwt_expire_minutes: int = 480
-
     # ── App ───────────────────────────────────────────────────────────────────
     environment: str = "development"
     log_level: str = "INFO"
@@ -52,7 +48,7 @@ class Settings(BaseSettings):
     ]
 
     # ── Report storage ─────────────────────────────────────────────────────────
-    report_storage_bucket: str = "compliance-reports"  # Supabase Storage bucket
+    report_storage_bucket: str = "compliance-reports"
 
 
 @lru_cache
@@ -61,7 +57,10 @@ def get_settings() -> Settings:
 
 
 @lru_cache
-def get_anthropic_client() -> anthropic.AsyncAnthropic:
-    """Singleton async Anthropic client, streaming-capable."""
+def get_ai_client() -> AsyncOpenAI:
+    """Singleton async DeepSeek client (OpenAI-compatible)."""
     settings = get_settings()
-    return anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key)
+    return AsyncOpenAI(
+        api_key=settings.deepseek_api_key,
+        base_url=settings.deepseek_base_url,
+    )

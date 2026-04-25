@@ -74,7 +74,7 @@ async def health():
         "status": "ok",
         "platform": "Minoan AI Platform",
         "version": "1.0.0",
-        "stack": {"db": "supabase", "ai": settings.anthropic_model, "cache": "supabase-realtime"},
+        "stack": {"db": "supabase", "ai": settings.deepseek_model, "cache": "supabase-realtime"},
         "environment": settings.environment,
     }
 
@@ -111,7 +111,7 @@ async def test_ai(request: Request, payload: TestAIRequest):
         )
 
     response = await complete(system, payload.prompt)
-    return {"response": response, "model": settings.anthropic_model}
+    return {"response": response, "model": settings.deepseek_model}
 
 
 # ── Routers ───────────────────────────────────────────────────────────────────
