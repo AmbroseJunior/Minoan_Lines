@@ -4,6 +4,10 @@ on:
   push:
     branches: [master]
 
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   deploy-frontend:
     name: Flutter Web → Vercel
@@ -34,12 +38,9 @@ jobs:
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           API_BASE_URL: ${{ secrets.API_BASE_URL }}
         run: |
-          # Strip whitespace/trailing slash; fall back to hardcoded Railway URL
-          RAW="${API_BASE_URL}"
-          API_URL="$(echo "$RAW" | tr -d '[:space:]' | sed 's|/*$||')"
-          API_URL="${API_URL:-https://minoanlines-production.up.railway.app}"
-          echo ">>> API_BASE_URL secret present: $([ -n "$RAW" ] && echo YES || echo NO)"
-          echo ">>> Building Flutter with API_URL=${API_URL}"
+          RAW="$(echo "${API_BASE_URL}" | tr -d '[:space:]' | sed 's|/*$||')"
+          API_URL="${RAW:-https://minoanlines-production.up.railway.app}"
+          echo ">>> API_URL baked in: ${API_URL}"
           flutter build web --release \
             "--dart-define=SUPABASE_URL=${SUPABASE_URL}" \
             "--dart-define=SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}" \
@@ -54,8 +55,28 @@ jobs:
           npm install -g vercel@latest
           mkdir -p .vercel/output/static
           cp -r app/build/web/. .vercel/output/static/
-          printf '{"version":3,"routes":[{"handle":"filesystem"},{"src":"/(.*)","dest":"/index.html"}]}' \
-            > .vercel/output/config.json
+
+          # Cache headers: no-cache service worker so browsers always pick up new builds
+          cat > .vercel/output/config.json << 'EOF'
+          {
+            "version": 3,
+            "routes": [
+              {
+                "src": "/flutter_service_worker.js",
+                "headers": { "Cache-Control": "no-cache, no-store, must-revalidate" },
+                "continue": true
+              },
+              {
+                "src": "/assets/(.*)",
+                "headers": { "Cache-Control": "public, max-age=31536000, immutable" },
+                "continue": true
+              },
+              { "handle": "filesystem" },
+              { "src": "/(.*)", "dest": "/index.html" }
+            ]
+          }
+          EOF
+
           printf '{"orgId":"%s","projectId":"%s"}' "$VERCEL_ORG_ID" "$VERCEL_PROJECT_ID" \
             > .vercel/project.json
           vercel deploy --prebuilt --prod --yes --token="$VERCEL_TOKEN"
