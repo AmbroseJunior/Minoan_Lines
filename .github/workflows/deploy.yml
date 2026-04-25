@@ -10,53 +10,30 @@ concurrency:
 
 jobs:
   # ──────────────────────────────────────────────────────────────────────────
-  # 1. Build Flutter web → deploy to Vercel
+  # 1. Trigger Vercel deployment (Vercel builds Flutter via scripts/vercel-build.sh)
   # ──────────────────────────────────────────────────────────────────────────
   deploy-flutter-web:
     name: Flutter Web → Vercel
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: app
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: "3.24.5"
-          channel: stable
-          cache: true
-
-      - name: Cache pub packages
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.pub-cache
-            app/.dart_tool
-          key: pub-${{ runner.os }}-${{ hashFiles('app/pubspec.lock') }}
-          restore-keys: pub-${{ runner.os }}-
-
-      - name: Install packages
-        run: flutter pub get
-
-      - name: Build Flutter web (release, CanvasKit)
+      - name: Trigger Vercel production deployment
         run: |
-          flutter build web \
-            --release \
-            --web-renderer canvaskit \
-            --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
-            --dart-define=API_BASE_URL=${{ secrets.API_BASE_URL }}
-
-      - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          working-directory: app/build/web
-          vercel-args: "--prod"
+          curl -fsSL -X POST \
+            "https://api.vercel.com/v13/deployments" \
+            -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "name": "minoan-lines",
+              "gitSource": {
+                "type": "github",
+                "repoId": "${{ github.event.repository.id }}",
+                "ref": "${{ github.ref_name }}"
+              },
+              "target": "production"
+            }'
 
   # ──────────────────────────────────────────────────────────────────────────
   # 2. Deploy FastAPI backend to Railway

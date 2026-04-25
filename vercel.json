@@ -1,7 +1,7 @@
 {
-  "buildCommand": "echo 'Flutter web built in CI — serving pre-built output'",
+  "buildCommand": "bash scripts/vercel-build.sh",
   "outputDirectory": "app/build/web",
-  "installCommand": "echo 'No install needed'",
+  "installCommand": "echo 'Flutter installed in buildCommand'",
   "framework": null,
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
