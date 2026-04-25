@@ -46,7 +46,9 @@ class Settings(BaseSettings):
         "http://localhost:8080",
         "https://minoan-lines.vercel.app",
         "https://minoan-lines-git-master-ambrosejuniors-projects.vercel.app",
+        "https://minoanlines-production.up.railway.app",
     ]
+    cors_origin_regex: str = r"https://.*\.vercel\.app"
 
     # ── Report storage ─────────────────────────────────────────────────────────
     report_storage_bucket: str = "compliance-reports"
