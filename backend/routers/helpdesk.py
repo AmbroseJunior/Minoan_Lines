@@ -12,12 +12,13 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 import structlog
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, HTTPException, Query, Request
 from pydantic import BaseModel
 
 from middleware.rate_limiter import ai_limit, default_limit
-from models.ticket import PRIORITY_SLA_HOURS
 from services.ai_service import classify_ticket
+
+PRIORITY_SLA_HOURS = {"critical": 2, "high": 8, "medium": 24, "low": 72}
 from supabase_client import db
 
 log = structlog.get_logger(__name__)
