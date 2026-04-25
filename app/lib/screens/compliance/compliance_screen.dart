@@ -53,36 +53,6 @@ class _ComplianceScreenState extends ConsumerState<ComplianceScreen> {
     final isWide = MediaQuery.sizeOf(context).width > 700;
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: MinoanTheme.navy,
-        title: const Text('Compliance & Reporting'),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: isWide
-            ? Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Expanded(child: _generateCard()),
-                const SizedBox(width: 14),
-                Expanded(child: _fuelCard()),
-              ])
-            : Column(children: [
-                _generateCard(),
-                const SizedBox(height: 14),
-                _fuelCard(),
-              ]),
-      ).also((_) {}),
-    ).also((_) {
-      // attach report history below forms
-    });
-  }
-
-  // Override build to append report history
-  @override
-  Widget buildX(BuildContext context) {
-    final reportsAsync = ref.watch(_reportsProvider);
-    final isWide = MediaQuery.sizeOf(context).width > 700;
-
-    return Scaffold(
       appBar: AppBar(backgroundColor: MinoanTheme.navy, title: const Text('Compliance & Reporting')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -154,7 +124,7 @@ class _ComplianceScreenState extends ConsumerState<ComplianceScreen> {
               ? const Row(mainAxisSize: MainAxisSize.min, children: [
                   SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)),
                   SizedBox(width: 8),
-                  Text('Generating with Claude…'),
+                  Text('Generating…'),
                 ])
               : const Text('Generate Report'),
         )),
@@ -302,9 +272,4 @@ class _ComplianceScreenState extends ConsumerState<ComplianceScreen> {
       setState(() => _fuelMsg = 'Error: $e');
     }
   }
-}
-
-// Dart extension to allow chaining
-extension _Also<T> on T {
-  T also(void Function(T) block) { block(this); return this; }
 }

@@ -136,12 +136,6 @@ class ApiService {
     required String message,
     String? sessionId,
   }) async* {
-    final request = Request('POST', '/chat', data: {
-      'message': message,
-      if (sessionId != null) 'session_id': sessionId,
-    });
-
-    // Use Dio's stream response for SSE
     final response = await _dio.post<ResponseBody>(
       '/chat',
       data: {'message': message, if (sessionId != null) 'session_id': sessionId},
@@ -220,14 +214,6 @@ class ChatEvent {
       ChatEvent._(type: ChatEventType.text, text: t);
   factory ChatEvent.done({bool escalate = false, double confidence = 1.0}) =>
       ChatEvent._(type: ChatEventType.done, escalate: escalate, confidence: confidence);
-}
-
-// ── Fake Request class for parameter passing ─────────────────────────────────
-class Request {
-  final String method;
-  final String path;
-  final Map<String, dynamic>? data;
-  Request(this.method, this.path, {this.data});
 }
 
 // ── Interceptors ──────────────────────────────────────────────────────────────

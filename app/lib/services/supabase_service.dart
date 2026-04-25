@@ -54,11 +54,11 @@ class SupabaseService {
   Future<List<Map<String, dynamic>>> getFuelRecords({
     String? vesselName,
   }) async {
-    var query = client.from('fuel_consumption_records').select();
-    if (vesselName != null) {
-      query = query.eq('vessel_name', vesselName) as dynamic;
-    }
-    final res = await (query as dynamic).order('departure_time', ascending: false).limit(200);
-    return List<Map<String, dynamic>>.from(res as List);
+    var q = client.from('fuel_consumption_records').select();
+    final res = await (vesselName != null
+        ? q.eq('vessel_name', vesselName)
+        : q
+    ).order('departure_time', ascending: false).limit(200);
+    return List<Map<String, dynamic>>.from(res);
   }
 }

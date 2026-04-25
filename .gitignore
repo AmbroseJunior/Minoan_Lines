@@ -38,4 +38,4 @@ app/pubspec.lock
 Thumbs.db
 
 # Railway / Vercel
-.vercel/
+.vercel/app/.env
