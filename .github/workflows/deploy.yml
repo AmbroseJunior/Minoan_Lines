@@ -29,11 +29,16 @@ jobs:
 
       - name: Build web
         working-directory: app
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          API_BASE_URL: ${{ secrets.API_BASE_URL }}
         run: |
+          API_URL="${API_BASE_URL:-https://minoan-lines-production.up.railway.app}"
           flutter build web --release \
-            "--dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }}" \
-            "--dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" \
-            "--dart-define=API_BASE_URL=${{ secrets.API_BASE_URL }}"
+            "--dart-define=SUPABASE_URL=${SUPABASE_URL}" \
+            "--dart-define=SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}" \
+            "--dart-define=API_BASE_URL=${API_URL}"
 
       - name: Deploy to Vercel
         env:

@@ -2,7 +2,7 @@
 IntegraMind AI × Minoan Lines S.A.
 AI-Powered IT & Operations Platform — FastAPI Entry Point
 
-Stack: FastAPI + Supabase + Anthropic Claude + slowapi rate limiting
+Stack: FastAPI + Supabase + DeepSeek AI + slowapi rate limiting
 Deploy: Railway (API) + Vercel (Flutter web)
 """
 import structlog
@@ -31,11 +31,11 @@ app = FastAPI(
     title="IntegraMind AI × Minoan Lines Platform",
     description=(
         "Production-grade AI automation platform for Minoan Lines S.A.\n\n"
-        "**Stack:** FastAPI · Supabase · Anthropic Claude · Flutter\n"
+        "**Stack:** FastAPI · Supabase · DeepSeek AI · Flutter\n"
         "**Built by:** IntegraMind AI (integramindai.com)\n\n"
         "### Modules\n"
         "1. **Vessel Ops** `/vessels` — AIS tracking + delay prediction\n"
-        "2. **Customer Agent** `/chat` — streaming Claude (Greek/English)\n"
+        "2. **Customer Agent** `/chat` — streaming DeepSeek (Greek/English)\n"
         "3. **Compliance** `/reports` — EU ETS + FuelEU PDF reports\n"
         "4. **Helpdesk** `/tickets` — AI triage + SLA tracking\n"
         "5. **Analytics** `/analytics` — demand forecasting\n"
@@ -88,7 +88,7 @@ class TestAIRequest(BaseModel):
 @app.post("/test-ai", tags=["system"])
 @ai_limit
 async def test_ai(request: Request, payload: TestAIRequest):
-    """Test the Claude AI pipeline. Rate limited: 20 req/min."""
+    """Test the DeepSeek AI pipeline. Rate limited: 20 req/min."""
     from services.ai_service import complete, stream as ai_stream
     from fastapi.responses import StreamingResponse
     import json

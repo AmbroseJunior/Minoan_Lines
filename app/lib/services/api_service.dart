@@ -11,8 +11,13 @@ class ApiService {
   ApiService._();
   static final ApiService instance = ApiService._();
 
+  static String get _resolvedBaseUrl {
+    final url = AppConfig.apiBaseUrl;
+    return (url.isEmpty) ? 'http://localhost:8000' : url;
+  }
+
   late final Dio _dio = Dio(BaseOptions(
-    baseUrl: AppConfig.apiBaseUrl,
+    baseUrl: _resolvedBaseUrl,
     connectTimeout: const Duration(seconds: 15),
     receiveTimeout: const Duration(seconds: 60),
     headers: {'Content-Type': 'application/json'},
@@ -130,7 +135,7 @@ class ApiService {
 
   // ── Streaming chat (SSE) ──────────────────────────────────────────────────
 
-  /// Returns a Stream of text chunks from the Claude customer agent.
+  /// Returns a Stream of text chunks from the DeepSeek customer agent.
   /// Also emits special events as control messages (session_id, escalation).
   Stream<ChatEvent> streamChat({
     required String message,

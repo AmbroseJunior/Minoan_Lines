@@ -189,7 +189,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                         : () => ref.read(performanceSummaryProvider.notifier).fetch(_queryCtrl.text),
                     child: summaryState.isLoading
                         ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                        : const Text('Ask Claude'),
+                        : const Text('Ask DeepSeek'),
                   ),
                 ]),
                 summaryState.when(

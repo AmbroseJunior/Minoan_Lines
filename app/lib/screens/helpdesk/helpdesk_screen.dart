@@ -285,7 +285,7 @@ class _HelpdeskScreenState extends ConsumerState<HelpdeskScreen> {
                       ? const Row(mainAxisSize: MainAxisSize.min, children: [
                           SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)),
                           SizedBox(width: 8),
-                          Text('Triaging with Claude…'),
+                          Text('Triaging with DeepSeek…'),
                         ])
                       : const Text('Submit Ticket'),
                 )),

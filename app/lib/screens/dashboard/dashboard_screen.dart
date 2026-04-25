@@ -250,7 +250,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               onPressed: queryState.isLoading ? null : _sendQuery,
               child: queryState.isLoading
                   ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : const Text('Ask Claude'),
+                  : const Text('Ask DeepSeek'),
             ),
           ]),
           queryState.when(
