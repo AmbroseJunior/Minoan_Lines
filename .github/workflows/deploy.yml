@@ -1,4 +1,4 @@
-name: Deploy
+name: Deploy to Vercel
 
 on:
   push:
@@ -9,85 +9,31 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  deploy-frontend:
-    name: Flutter Web → Vercel
+  deploy:
+    name: Build & Deploy (Next.js → Vercel)
     runs-on: ubuntu-22.04
-
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          channel: 'stable'
-          cache: true
+          node-version: '20'
+          cache: 'npm'
 
-      - name: pub get
-        run: flutter pub get
-        working-directory: app
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Build web
-        working-directory: app
+      - name: Build Next.js
+        run: npm run build
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-          API_BASE_URL: ${{ secrets.API_BASE_URL }}
-        run: |
-          RAW="$(echo "${API_BASE_URL}" | tr -d '[:space:]' | sed 's|/*$||')"
-          API_URL="${RAW:-https://minoanlines-production.up.railway.app}"
-          echo ">>> Building with API_URL=${API_URL}"
-          flutter build web --release \
-            "--dart-define=SUPABASE_URL=${SUPABASE_URL}" \
-            "--dart-define=SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}" \
-            "--dart-define=API_BASE_URL=${API_URL}"
-
-      - name: Verify build output
-        run: |
-          if [ ! -f "app/build/web/index.html" ]; then
-            echo "ERROR: Flutter build failed — index.html not found"
-            exit 1
-          fi
-          echo "Build OK — $(ls app/build/web | wc -l) files"
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
 
       - name: Deploy to Vercel
+        run: npx vercel deploy --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
         env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        run: |
-          npm install -g vercel@latest
-          mkdir -p .vercel/output/static
-          cp -r app/build/web/. .vercel/output/static/
-          cat > .vercel/output/config.json << 'EOF'
-          {
-            "version": 3,
-            "routes": [
-              {
-                "src": "/flutter_service_worker.js",
-                "headers": { "Cache-Control": "no-cache, no-store, must-revalidate" },
-                "continue": true
-              },
-              {
-                "src": "/assets/(.*)",
-                "headers": { "Cache-Control": "public, max-age=31536000, immutable" },
-                "continue": true
-              },
-              { "handle": "filesystem" },
-              { "src": "/(.*)", "dest": "/index.html" }
-            ]
-          }
-          EOF
-          printf '{"orgId":"%s","projectId":"%s"}' "$VERCEL_ORG_ID" "$VERCEL_PROJECT_ID" \
-            > .vercel/project.json
-          vercel deploy --prebuilt --prod --yes --token="$VERCEL_TOKEN"
-
-  deploy-backend:
-    name: FastAPI → Railway
-    runs-on: ubuntu-22.04
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v3
-      - name: Deploy to Railway
-        run: npm install -g @railway/cli@latest && railway up --service Minoan_Lines --detach
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}

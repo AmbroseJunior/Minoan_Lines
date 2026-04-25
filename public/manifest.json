@@ -1,0 +1,19 @@
+{
+  "name": "Minoan Lines AI Platform",
+  "short_name": "Minoan AI",
+  "description": "AI-Powered Operations Platform for Minoan Lines S.A.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#001A4D",
+  "theme_color": "#003087",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "categories": ["business", "productivity"],
+  "shortcuts": [
+    { "name": "Vessel Ops", "url": "/vessels", "description": "View vessel tracking" },
+    { "name": "AI Chat", "url": "/chat", "description": "Customer AI agent" }
+  ]
+}
