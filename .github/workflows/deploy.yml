@@ -12,11 +12,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install Flutter (stable branch)
+      - name: Install Flutter
         run: |
           git clone https://github.com/flutter/flutter.git \
-            --branch stable --depth 1 /opt/flutter
-          echo "/opt/flutter/bin" >> "$GITHUB_PATH"
+            --branch stable --single-branch --depth 1 "$HOME/flutter"
+          echo "$HOME/flutter/bin" >> "$GITHUB_PATH"
 
       - name: Configure Flutter
         run: |
