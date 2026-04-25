@@ -43,8 +43,8 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     cors_origins: List[str] = [
         "http://localhost:3000",
-        "http://localhost:8000",
-        "https://minoan-ai.vercel.app",
+        "http://localhost:8080",
+        "https://minoan-lines-git-master-ambrosejuniors-projects.vercel.app",
     ]
 
     # ── Report storage ─────────────────────────────────────────────────────────
