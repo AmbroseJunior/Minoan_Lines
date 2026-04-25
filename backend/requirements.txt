@@ -6,12 +6,8 @@ python-multipart==0.0.12
 # DeepSeek (OpenAI-compatible API)
 openai==1.54.0
 
-# Supabase (replaces SQLAlchemy + asyncpg + Redis)
+# Supabase
 supabase==2.10.0
-gotrue==2.9.0
-postgrest==0.17.0
-storage3==0.8.1
-realtime==2.0.6
 
 # Rate limiting
 slowapi==0.1.9
