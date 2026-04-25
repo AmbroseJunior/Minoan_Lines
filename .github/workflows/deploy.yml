@@ -16,16 +16,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install Flutter
-        run: |
-          git clone https://github.com/flutter/flutter.git \
-            --branch stable --single-branch --depth 1 "$HOME/flutter"
-          echo "$HOME/flutter/bin" >> "$GITHUB_PATH"
-
-      - name: Configure Flutter
-        run: |
-          flutter config --no-analytics --enable-web
-          flutter --version
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.5'
+          channel: 'stable'
+          cache: true
 
       - name: pub get
         run: flutter pub get
@@ -40,11 +36,19 @@ jobs:
         run: |
           RAW="$(echo "${API_BASE_URL}" | tr -d '[:space:]' | sed 's|/*$||')"
           API_URL="${RAW:-https://minoanlines-production.up.railway.app}"
-          echo ">>> API_URL baked in: ${API_URL}"
+          echo ">>> Building with API_URL=${API_URL}"
           flutter build web --release \
             "--dart-define=SUPABASE_URL=${SUPABASE_URL}" \
             "--dart-define=SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}" \
             "--dart-define=API_BASE_URL=${API_URL}"
+
+      - name: Verify build output
+        run: |
+          if [ ! -f "app/build/web/index.html" ]; then
+            echo "ERROR: Flutter build failed — index.html not found"
+            exit 1
+          fi
+          echo "Build OK — $(ls app/build/web | wc -l) files"
 
       - name: Deploy to Vercel
         env:
@@ -55,8 +59,6 @@ jobs:
           npm install -g vercel@latest
           mkdir -p .vercel/output/static
           cp -r app/build/web/. .vercel/output/static/
-
-          # Cache headers: no-cache service worker so browsers always pick up new builds
           cat > .vercel/output/config.json << 'EOF'
           {
             "version": 3,
@@ -76,7 +78,6 @@ jobs:
             ]
           }
           EOF
-
           printf '{"orgId":"%s","projectId":"%s"}' "$VERCEL_ORG_ID" "$VERCEL_PROJECT_ID" \
             > .vercel/project.json
           vercel deploy --prebuilt --prod --yes --token="$VERCEL_TOKEN"
