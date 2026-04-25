@@ -57,7 +57,10 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
           npm install -g vercel@latest
-          vercel deploy --prebuilt --prod --yes
+          # Link CLI to the correct Vercel project
+          mkdir -p .vercel
+          printf '{"orgId":"%s","projectId":"%s"}' "$VERCEL_ORG_ID" "$VERCEL_PROJECT_ID" > .vercel/project.json
+          vercel deploy --prebuilt --prod --yes --token="$VERCEL_TOKEN"
 
   # ── FastAPI → Railway ────────────────────────────────────────────────────────
   deploy-backend:
