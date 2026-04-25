@@ -17,19 +17,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.24.5'
-          channel: 'stable'
-          cache: true
+      - name: Install Flutter 3.24.5
+        run: |
+          curl -fsSL \
+            "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.24.5-stable.tar.xz" \
+            -o /tmp/flutter.tar.xz
+          tar xf /tmp/flutter.tar.xz -C "$HOME"
+          echo "$HOME/flutter/bin" >> "$GITHUB_PATH"
 
-      - name: Flutter version
-        run: flutter --version
+      - name: Configure Flutter for web
+        run: |
+          flutter config --no-analytics --enable-web
+          flutter --version
 
-      - name: Install dependencies
-        working-directory: app
+      - name: Install pub dependencies
         run: flutter pub get
+        working-directory: app
 
       - name: Build Flutter web
         working-directory: app
@@ -41,16 +44,12 @@ jobs:
             "--dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" \
             "--dart-define=API_BASE_URL=${{ secrets.API_BASE_URL }}"
 
-      - name: Verify build output exists
-        run: |
-          echo "Files in app/build/web:"
-          ls -la app/build/web/
-
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
 
-      - name: Prepare Vercel output
+      - name: Deploy to Vercel
         env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
@@ -60,17 +59,9 @@ jobs:
             > .vercel/output/config.json
           printf '{"orgId":"%s","projectId":"%s"}' "$VERCEL_ORG_ID" "$VERCEL_PROJECT_ID" \
             > .vercel/project.json
-          echo "=== .vercel/project.json ==="
-          cat .vercel/project.json
-          echo "=== .vercel/output/config.json ==="
-          cat .vercel/output/config.json
-          echo "=== static file count ==="
-          ls .vercel/output/static/ | wc -l
+          vercel deploy --prebuilt --prod --yes --token="$VERCEL_TOKEN"
 
-      - name: Deploy to Vercel
-        run: vercel deploy --prebuilt --prod --yes --token="${{ secrets.VERCEL_TOKEN }}"
-
-  # ── FastAPI → Railway ────────────────────────────────────────────────────────
+  # ── FastAPI → Railway (non-blocking) ────────────────────────────────────────
   deploy-backend:
     name: FastAPI → Railway
     runs-on: ubuntu-latest
@@ -79,11 +70,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Railway CLI
-        run: npm install -g @railway/cli@latest
-
       - name: Deploy to Railway
-        run: railway up --detach
-        working-directory: .
+        run: |
+          npm install -g @railway/cli@latest
+          railway up --detach
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
