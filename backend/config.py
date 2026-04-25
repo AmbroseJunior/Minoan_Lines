@@ -3,7 +3,6 @@ IntegraMind AI × Minoan Lines
 Central configuration — all settings loaded from environment variables.
 """
 from functools import lru_cache
-from typing import List
 
 from openai import AsyncOpenAI
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -41,8 +40,6 @@ class Settings(BaseSettings):
     # ── App ───────────────────────────────────────────────────────────────────
     environment: str = "development"
     log_level: str = "INFO"
-    cors_origins: List[str] = ["*"]
-    cors_origin_regex: str = ""
 
     # ── Report storage ─────────────────────────────────────────────────────────
     report_storage_bucket: str = "compliance-reports"
