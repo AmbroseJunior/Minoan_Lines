@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Ship, MessageCircle, FileText, Headphones, BarChart2, Anchor, Sun, Moon, Ticket } from 'lucide-react';
+import { Ship, MessageCircle, FileText, Headphones, BarChart2, Anchor, Sun, Moon, Ticket, LayoutDashboard } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
 import { useTheme } from './ThemeProvider';
@@ -30,35 +30,34 @@ export default function Nav() {
           </Link>
           <div className="flex items-center gap-1">
             {links.map(({ href, label, icon: Icon }) => (
-              <Link
-                key={href}
-                href={href}
+              <Link key={href} href={href}
                 className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium transition-colors
-                  ${path?.startsWith(href) ? 'bg-[#003087] text-white' : 'text-blue-200 hover:text-white hover:bg-white/10'}`}
-              >
+                  ${path?.startsWith(href) ? 'bg-[#003087] text-white' : 'text-blue-200 hover:text-white hover:bg-white/10'}`}>
                 <Icon className="w-4 h-4" />
                 <span className="hidden lg:inline">{label}</span>
               </Link>
             ))}
 
+            {/* Dashboard */}
+            <Link href="/dashboard"
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium transition-colors
+                ${path?.startsWith('/dashboard') ? 'bg-[#003087] text-white' : 'text-blue-200 hover:text-white hover:bg-white/10'}`}>
+              <LayoutDashboard className="w-4 h-4" />
+              <span className="hidden xl:inline">Dashboard</span>
+            </Link>
+
             {/* Book CTA */}
-            <Link
-              href="/book"
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ml-1
-                ${path?.startsWith('/book')
-                  ? 'bg-[#C9A84C] text-white'
-                  : 'bg-[#C9A84C]/20 text-[#C9A84C] hover:bg-[#C9A84C] hover:text-white border border-[#C9A84C]/40'}`}
-            >
+            <Link href="/book"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ml-0.5
+                ${path?.startsWith('/book') ? 'bg-[#C9A84C] text-white' : 'bg-[#C9A84C]/20 text-[#C9A84C] hover:bg-[#C9A84C] hover:text-white border border-[#C9A84C]/40'}`}>
               <Ticket className="w-4 h-4" />
               <span className="hidden sm:inline">Book</span>
             </Link>
 
             <div className="ml-1 border-l border-white/20 pl-2 flex items-center gap-1">
-              <button
-                onClick={toggle}
+              <button onClick={toggle}
                 title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-                className="p-1.5 rounded-lg text-blue-200 hover:text-white hover:bg-white/10 transition-colors"
-              >
+                className="p-1.5 rounded-lg text-blue-200 hover:text-white hover:bg-white/10 transition-colors">
                 {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
               </button>
               <LanguageSwitcher />
