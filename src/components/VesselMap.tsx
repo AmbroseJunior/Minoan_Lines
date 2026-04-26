@@ -4,7 +4,7 @@ import 'leaflet/dist/leaflet.css';
 
 type Vessel = {
   name: string; status: string; speed_knots: number; route: string;
-  lat: number; lon: number; delay_probability: number;
+  lat: number; lon: number; delay_probability: number; heading: number;
   departure_time: string; arrival_time: string; eta_label: string; eta_hours: number | null;
 };
 
