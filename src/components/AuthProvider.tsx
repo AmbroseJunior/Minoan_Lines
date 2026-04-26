@@ -15,7 +15,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     const db = getSupabaseBrowser();
-    db.auth.getSession().then(({ data }) => {
+    db.auth.getSession().then(({ data }: { data: { session: { user: import('@supabase/supabase-js').User } | null } }) => {
       setUser(data.session?.user ?? null);
       setChecking(false);
     });
