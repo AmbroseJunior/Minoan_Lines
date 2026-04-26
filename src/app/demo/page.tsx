@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { Ship, MessageCircle, FileText, Headphones, BarChart2, Ticket, CheckCircle, ArrowRight, Zap, Globe, Mail, Calendar, ShieldCheck, Activity, AlertTriangle, Clock, TrendingUp, Users } from 'lucide-react';
+import { Ship, MessageCircle, FileText, Headphones, BarChart2, Ticket, CheckCircle, ArrowRight, Zap, Globe, Mail, Calendar, ShieldCheck, Activity, AlertTriangle, Clock, TrendingUp, Users, Building2, MapPin, Anchor } from 'lucide-react';
 
 const modules = [
   {
@@ -334,6 +334,157 @@ export default function DemoPage() {
         </div>
       </div>
 
+      {/* Grimaldi Group Expansion */}
+      <div className="card overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-[#001A4D] via-[#003087] to-[#001A4D] px-8 py-7">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-xl bg-[#C9A84C]/20 border border-[#C9A84C]/40 flex items-center justify-center">
+              <Globe className="w-5 h-5 text-[#C9A84C]" />
+            </div>
+            <div>
+              <div className="text-[#C9A84C] text-xs font-bold uppercase tracking-widest">Strategic Vision</div>
+              <h2 className="text-white text-xl font-bold">From Minoan Lines to the Grimaldi Group</h2>
+            </div>
+          </div>
+          <p className="text-blue-200 text-sm leading-relaxed max-w-3xl">
+            Minoan Lines is the proof of concept. Once the platform is embedded and delivering measurable results here,
+            the same architecture — AI customer agents, compliance automation, fleet intelligence, and IT operations —
+            rolls out across every Grimaldi Group company without starting from zero.
+          </p>
+        </div>
+
+        <div className="p-8 space-y-8">
+
+          {/* Step progression */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              {
+                step: '01',
+                company: 'Minoan Lines',
+                label: 'Now — Live',
+                labelColor: 'text-green-600 bg-green-50 dark:bg-green-900/20',
+                dotColor: 'bg-green-500',
+                desc: 'Full platform deployed. 7 modules live. AI helpdesk, compliance automation, vessel ops, and booking running in production.',
+                routes: 'Piraeus · Heraklion · Chania',
+                vessels: '8 vessels',
+                icon: Anchor,
+                border: 'border-green-200 dark:border-green-800/40',
+                bg: 'bg-green-50/50 dark:bg-green-900/10',
+              },
+              {
+                step: '02',
+                company: 'Grimaldi Lines',
+                label: 'Phase 2 — 3–6 months',
+                labelColor: 'text-amber-600 bg-amber-50 dark:bg-amber-900/20',
+                dotColor: 'bg-amber-400',
+                desc: 'Italy–Mediterranean ro-ro and passenger ferry operations. Compliance, IT helpdesk, and booking workflows adapted and deployed.',
+                routes: 'Italy · Spain · Tunisia · Greece',
+                vessels: '30+ vessels',
+                icon: Ship,
+                border: 'border-amber-200 dark:border-amber-800/40',
+                bg: 'bg-amber-50/50 dark:bg-amber-900/10',
+              },
+              {
+                step: '03',
+                company: 'Full Grimaldi Group',
+                label: 'Phase 3 — 6–18 months',
+                labelColor: 'text-blue-600 bg-blue-50 dark:bg-blue-900/20',
+                dotColor: 'bg-blue-500',
+                desc: 'Finnlines, ACL, and all subsidiaries on one unified platform. Group-level executive reporting. Single AI layer across the entire fleet.',
+                routes: 'Baltic · Atlantic · Mediterranean · West Africa',
+                vessels: '130+ vessels',
+                icon: Globe,
+                border: 'border-blue-200 dark:border-blue-800/40',
+                bg: 'bg-blue-50/50 dark:bg-blue-900/10',
+              },
+            ].map(({ step, company, label, labelColor, dotColor, desc, routes, vessels, icon: Icon, border, bg }) => (
+              <div key={step} className={`rounded-xl border ${border} ${bg} p-5 space-y-3`}>
+                <div className="flex items-start justify-between">
+                  <div className="text-3xl font-black text-gray-100 dark:text-slate-700">{step}</div>
+                  <span className={`text-[10px] font-bold px-2 py-1 rounded-full flex items-center gap-1 ${labelColor}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />{label}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Icon className="w-5 h-5 text-[#001A4D] dark:text-blue-300" />
+                  <h3 className="font-bold text-gray-900 dark:text-slate-100">{company}</h3>
+                </div>
+                <p className="text-xs text-gray-600 dark:text-slate-400 leading-relaxed">{desc}</p>
+                <div className="pt-2 border-t border-gray-100 dark:border-slate-700 space-y-1">
+                  <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
+                    <MapPin className="w-3 h-3 flex-shrink-0" />{routes}
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
+                    <Ship className="w-3 h-3 flex-shrink-0" />{vessels}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Why this matters */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h3 className="font-bold text-[#001A4D] dark:text-slate-100 mb-3 flex items-center gap-2">
+                <Building2 className="w-4 h-4 text-[#C9A84C]" />
+                Why start with Minoan Lines
+              </h3>
+              <div className="space-y-2">
+                {[
+                  'Smaller fleet and defined routes create a controlled, measurable pilot environment',
+                  'Strong EU regulatory exposure — ETS and FuelEU — creates immediate, quantifiable compliance ROI',
+                  'Direct relationship with Grimaldi Group leadership means results are visible at group level',
+                  'Proving value here builds the internal business case for group-wide rollout with no external sales pressure',
+                ].map(point => (
+                  <div key={point} className="flex items-start gap-2">
+                    <CheckCircle className="w-3.5 h-3.5 text-green-500 mt-0.5 flex-shrink-0" />
+                    <p className="text-sm text-gray-600 dark:text-slate-400 leading-relaxed">{point}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h3 className="font-bold text-[#001A4D] dark:text-slate-100 mb-3 flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-[#C9A84C]" />
+                What scales without rebuilding
+              </h3>
+              <div className="space-y-2">
+                {[
+                  'Every module is configurable per company — routes, languages, compliance rules, and alert thresholds',
+                  'The AI customer agent already speaks 20 languages covering every Grimaldi Group market',
+                  'Compliance engine adapts to any EU ETS or FuelEU reporting scope — vessel count is just configuration',
+                  'Infrastructure monitoring and IT helpdesk deploy identically — no custom development per subsidiary',
+                ].map(point => (
+                  <div key={point} className="flex items-start gap-2">
+                    <CheckCircle className="w-3.5 h-3.5 text-blue-500 mt-0.5 flex-shrink-0" />
+                    <p className="text-sm text-gray-600 dark:text-slate-400 leading-relaxed">{point}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Group scale numbers */}
+          <div className="bg-gradient-to-r from-[#001A4D] to-[#003087] rounded-xl p-6">
+            <p className="text-[#C9A84C] text-xs font-bold uppercase tracking-widest mb-4">Grimaldi Group — Full Scale Opportunity</p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { value: '130+', label: 'Vessels across all subsidiaries' },
+                { value: '20+', label: 'Countries and markets served' },
+                { value: '6', label: 'Major subsidiary companies' },
+                { value: '1', label: 'Unified AI platform to run it all' },
+              ].map(({ value, label }) => (
+                <div key={label} className="text-center">
+                  <div className="text-2xl font-black text-[#C9A84C]">{value}</div>
+                  <div className="text-xs text-blue-200 mt-1 leading-tight">{label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Next Steps */}
       <div className="card p-8 border-2 border-[#C9A84C]/30">
         <div className="flex items-start gap-4">
@@ -344,8 +495,8 @@ export default function DemoPage() {
             <h2 className="text-lg font-bold text-[#001A4D] dark:text-slate-100 mb-2">Proposed Next Steps</h2>
             <div className="space-y-2 text-sm text-gray-700 dark:text-slate-300 leading-relaxed">
               <p>The platform is fully deployed and operational. All seven modules are live and demonstrable in a browser, on any device, right now.</p>
-              <p>The immediate next step is a technical integration session to connect the platform to Minoan Lines' existing systems — specifically the reservation database, live AIS feed, and the Grimaldi Group reporting portal.</p>
-              <p>A phased integration approach is recommended, starting with the highest-friction areas: automated compliance reporting delivery and live vessel data — both of which have the clearest ROI and the lowest integration complexity.</p>
+              <p>The immediate next step is a technical integration session to connect the platform to Minoan Lines' existing systems — the reservation database, live AIS feed, and Grimaldi Group reporting portal. This is the work that turns the pilot into a production-grade system.</p>
+              <p>Once Minoan Lines is fully integrated and the results are quantified, the same platform — with no architectural changes — expands to Grimaldi Lines, Finnlines, ACL, and the remaining subsidiaries. The group-level business case builds itself.</p>
             </div>
             <div className="flex flex-wrap gap-3 mt-5">
               <Link href="/dashboard" className="btn-primary flex items-center gap-2 text-sm">
