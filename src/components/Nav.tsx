@@ -1,8 +1,9 @@
 'use client';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
-import { Ship, MessageCircle, FileText, Headphones, BarChart2, Sun, Moon, Ticket, LayoutDashboard, Activity, LogOut } from 'lucide-react';
+import { Ship, MessageCircle, FileText, Headphones, BarChart2, Sun, Moon, Ticket, LayoutDashboard, Activity, LogOut, Menu, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
 import { useTheme } from './ThemeProvider';
@@ -13,6 +14,7 @@ export default function Nav() {
   const { t } = useTranslation();
   const { theme, toggle } = useTheme();
   const { user, signOut } = useAuth();
+  const [open, setOpen] = useState(false);
 
   const links = [
     { href: '/vessels', label: t('nav.vessels'), icon: Ship },
@@ -20,52 +22,42 @@ export default function Nav() {
     { href: '/compliance', label: t('nav.compliance'), icon: FileText },
     { href: '/helpdesk', label: t('nav.helpdesk'), icon: Headphones },
     { href: '/analytics', label: t('nav.analytics'), icon: BarChart2 },
+    { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/health', label: 'Health', icon: Activity },
   ];
 
+  const linkClass = (href: string) =>
+    `flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors
+    ${path?.startsWith(href) ? 'bg-[#003087] text-white' : 'text-blue-200 hover:text-white hover:bg-white/10'}`;
+
   return (
-    <nav className="bg-[#001A4D] text-white shadow-lg">
+    <nav className="bg-[#001A4D] text-white shadow-lg relative z-50">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-14">
-          <Link href="/" className="flex items-center flex-shrink-0">
+
+          {/* Logo */}
+          <Link href="/" className="flex items-center flex-shrink-0" onClick={() => setOpen(false)}>
             <Image src="/minoan-logo.svg" alt="Minoan Lines" width={140} height={35} className="h-9 w-auto" priority />
           </Link>
-          <div className="flex items-center gap-1">
+
+          {/* Desktop links */}
+          <div className="hidden md:flex items-center gap-0.5">
             {links.map(({ href, label, icon: Icon }) => (
-              <Link key={href} href={href}
-                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium transition-colors
-                  ${path?.startsWith(href) ? 'bg-[#003087] text-white' : 'text-blue-200 hover:text-white hover:bg-white/10'}`}>
-                <Icon className="w-4 h-4" />
+              <Link key={href} href={href} className={linkClass(href)}>
+                <Icon className="w-4 h-4 flex-shrink-0" />
                 <span className="hidden lg:inline">{label}</span>
               </Link>
             ))}
 
-            {/* Dashboard */}
-            <Link href="/dashboard"
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium transition-colors
-                ${path?.startsWith('/dashboard') ? 'bg-[#003087] text-white' : 'text-blue-200 hover:text-white hover:bg-white/10'}`}>
-              <LayoutDashboard className="w-4 h-4" />
-              <span className="hidden xl:inline">Dashboard</span>
-            </Link>
-
-            {/* Health */}
-            <Link href="/health"
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium transition-colors
-                ${path?.startsWith('/health') ? 'bg-[#003087] text-white' : 'text-blue-200 hover:text-white hover:bg-white/10'}`}>
-              <Activity className="w-4 h-4" />
-              <span className="hidden xl:inline">Health</span>
-            </Link>
-
-            {/* Book CTA */}
             <Link href="/book"
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ml-0.5
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ml-1
                 ${path?.startsWith('/book') ? 'bg-[#C9A84C] text-white' : 'bg-[#C9A84C]/20 text-[#C9A84C] hover:bg-[#C9A84C] hover:text-white border border-[#C9A84C]/40'}`}>
               <Ticket className="w-4 h-4" />
-              <span className="hidden sm:inline">Book</span>
+              <span className="hidden xl:inline">Book</span>
             </Link>
 
             <div className="ml-1 border-l border-white/20 pl-2 flex items-center gap-1">
-              <button onClick={toggle}
-                title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              <button onClick={toggle} title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
                 className="p-1.5 rounded-lg text-blue-200 hover:text-white hover:bg-white/10 transition-colors">
                 {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
               </button>
@@ -78,8 +70,50 @@ export default function Nav() {
               )}
             </div>
           </div>
+
+          {/* Mobile right side: theme + hamburger */}
+          <div className="flex md:hidden items-center gap-1">
+            <button onClick={toggle}
+              className="p-1.5 rounded-lg text-blue-200 hover:text-white hover:bg-white/10 transition-colors">
+              {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
+            <LanguageSwitcher />
+            <button onClick={() => setOpen(o => !o)} aria-label="Toggle menu"
+              className="p-1.5 rounded-lg text-blue-200 hover:text-white hover:bg-white/10 transition-colors">
+              {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Mobile dropdown */}
+      {open && (
+        <div className="md:hidden border-t border-white/10 bg-[#001A4D] px-4 py-3 space-y-1">
+          {links.map(({ href, label, icon: Icon }) => (
+            <Link key={href} href={href} onClick={() => setOpen(false)}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
+                ${path?.startsWith(href) ? 'bg-[#003087] text-white' : 'text-blue-200 hover:text-white hover:bg-white/10'}`}>
+              <Icon className="w-4 h-4 flex-shrink-0" />
+              {label}
+            </Link>
+          ))}
+
+          <Link href="/book" onClick={() => setOpen(false)}
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors
+              ${path?.startsWith('/book') ? 'bg-[#C9A84C] text-white' : 'bg-[#C9A84C]/20 text-[#C9A84C] hover:bg-[#C9A84C] hover:text-white border border-[#C9A84C]/40'}`}>
+            <Ticket className="w-4 h-4" />
+            Book a Ferry
+          </Link>
+
+          {user && (
+            <button onClick={() => { signOut(); setOpen(false); }}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-300 hover:bg-white/10 transition-colors">
+              <LogOut className="w-4 h-4" />
+              Sign out ({user.email})
+            </button>
+          )}
+        </div>
+      )}
     </nav>
   );
 }
