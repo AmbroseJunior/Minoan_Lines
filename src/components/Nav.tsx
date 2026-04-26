@@ -1,13 +1,15 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Ship, MessageCircle, FileText, Headphones, BarChart2, Anchor } from 'lucide-react';
+import { Ship, MessageCircle, FileText, Headphones, BarChart2, Anchor, Sun, Moon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
+import { useTheme } from './ThemeProvider';
 
 export default function Nav() {
   const path = usePathname();
   const { t } = useTranslation();
+  const { theme, toggle } = useTheme();
 
   const links = [
     { href: '/vessels', label: t('nav.vessels'), icon: Ship },
@@ -38,7 +40,14 @@ export default function Nav() {
                 <span className="hidden lg:inline">{label}</span>
               </Link>
             ))}
-            <div className="ml-1 border-l border-white/20 pl-1">
+            <div className="ml-1 border-l border-white/20 pl-2 flex items-center gap-1">
+              <button
+                onClick={toggle}
+                title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                className="p-1.5 rounded-lg text-blue-200 hover:text-white hover:bg-white/10 transition-colors"
+              >
+                {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </button>
               <LanguageSwitcher />
             </div>
           </div>

@@ -58,19 +58,53 @@ export async function POST(req: Request) {
     const targetRoute = route || ROUTES[0];
     const forecast = generateForecast(targetRoute, Math.min(horizon_days, 90));
     const avgPass = Math.round(forecast.reduce((s, f) => s + f.predicted_passengers, 0) / forecast.length);
-    const peakDay = forecast.reduce((max, f) => f.predicted_passengers > max.predicted_passengers ? f : max).date;
+    const peakDay = forecast.reduce((max, f) => f.predicted_passengers > max.predicted_passengers ? f : max);
+    const totalRevenue = Math.round(forecast.reduce((s, f) => s + f.predicted_passengers, 0) * 45);
+    const peakRevenue = Math.round(peakDay.predicted_passengers * 45);
+    const lowDay = forecast.reduce((min, f) => f.predicted_passengers < min.predicted_passengers ? f : min);
+    const weekendDays = forecast.filter(f => [5, 6].includes(new Date(f.date).getDay()));
+    const weekdayDays = forecast.filter(f => ![5, 6].includes(new Date(f.date).getDay()));
+    const avgWeekend = weekendDays.length ? Math.round(weekendDays.reduce((s, f) => s + f.predicted_passengers, 0) / weekendDays.length) : avgPass;
+    const avgWeekday = weekdayDays.length ? Math.round(weekdayDays.reduce((s, f) => s + f.predicted_passengers, 0) / weekdayDays.length) : avgPass;
+    const demandVariance = Math.round(((peakDay.predicted_passengers - lowDay.predicted_passengers) / lowDay.predicted_passengers) * 100);
 
-    const aiPrompt = `Analyze demand forecast for Minoan Lines ferry route ${targetRoute.replace('-', ' → ')}.
-Next ${horizon_days} days: avg ${avgPass} passengers/day. Peak day: ${peakDay}.
-Provide 3 actionable insights for capacity planning and revenue optimization. Under 200 words.`;
+    const aiPrompt = `You are a senior maritime revenue analyst for Minoan Lines S.A. Prepare a professional demand intelligence report for the route ${targetRoute.replace('-', ' to ')}.
+
+Forecast data for the next ${horizon_days} days:
+- Average daily passengers: ${avgPass}
+- Peak day: ${peakDay.date} with ${peakDay.predicted_passengers} passengers (revenue potential: EUR ${peakRevenue.toLocaleString()})
+- Lowest demand day: ${lowDay.date} with ${lowDay.predicted_passengers} passengers
+- Weekend average: ${avgWeekend} passengers/day vs weekday average: ${avgWeekday} passengers/day
+- Demand variance across period: ${demandVariance}%
+- Total projected period revenue: EUR ${totalRevenue.toLocaleString()}
+- Current average ticket yield: EUR 45 per passenger
+
+Write a professional analysis in plain prose. Do not use hashtags, asterisks, bullet points, dashes as list markers, markdown formatting, or emojis of any kind. Write in full paragraphs only.
+
+The analysis must cover each of the following areas as separate paragraphs:
+
+1. Demand Overview — summarise the forecast trend and what it means operationally for this route over the period.
+
+2. Revenue Opportunity — explain specifically how Minoan Lines can increase profit on this route. Quantify the upside in euros. Be concrete: state which days, what pricing strategy, and the estimated additional revenue if actioned.
+
+3. Risk and Reward Assessment — present the risk-reward ratio. What is the downside if no action is taken? Calculate estimated revenue loss in euros if demand is underserved (missed bookings, competitor capture). State both the potential gain and potential loss clearly.
+
+4. Operational Recommendations — provide three specific, immediately actionable recommendations. For each recommendation, state the expected financial impact in euros and the likelihood of success.
+
+5. Strategic Alert — if demand signals indicate risk of profit decline, state this clearly with urgency and a specific figure of how much revenue is at risk over the period if left unaddressed.
+
+Write as a human revenue analyst would. Be direct, quantitative, and business-focused. Maximum 450 words.`;
 
     const completion = await deepseek.chat.completions.create({
       model: DEEPSEEK_MODEL,
       messages: [{ role: 'user', content: aiPrompt }],
-      max_tokens: 400,
+      max_tokens: 800,
     });
 
-    const insights = completion.choices[0].message.content || '';
+    let insights = completion.choices[0].message.content || '';
+    // Strip any residual markdown
+    insights = insights.replace(/#{1,6}\s/g, '').replace(/\*{1,3}([^*]+)\*{1,3}/g, '$1').replace(/^\s*[-*+]\s/gm, '').replace(/`([^`]+)`/g, '$1');
+
     return NextResponse.json({ route: targetRoute, forecast, insights, generated_at: new Date().toISOString() });
   } catch (e) {
     return NextResponse.json(

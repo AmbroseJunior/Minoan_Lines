@@ -43,24 +43,48 @@ export async function POST(req: Request) {
     const { report_type = 'eu_ets' } = await req.json().catch(() => ({}));
     const data = buildComplianceData();
 
-    const totalCO2 = data.reduce((s, v) => s + v.co2_emissions_tons, 0).toFixed(0);
+    const totalCO2 = data.reduce((s, v) => s + v.co2_emissions_tons, 0).toFixed(1);
+    const totalETS = data.reduce((s, v) => s + v.eu_ets_allowances_needed, 0).toFixed(1);
     const avgCII = (data.reduce((s, v) => s + v.cii_score, 0) / data.length).toFixed(1);
+    const avgGHG = (data.reduce((s, v) => s + v.ghg_intensity, 0) / data.length).toFixed(2);
+    const ratingDist = data.reduce((acc, v) => { acc[v.fueleu_rating] = (acc[v.fueleu_rating] || 0) + 1; return acc; }, {} as Record<string, number>);
+    const vesselSummary = data.map(v => `${v.vessel}: CO2 ${v.co2_emissions_tons}t, CII ${v.cii_score}, FuelEU ${v.fueleu_rating}`).join('; ');
 
-    const prompt = `Generate a formal EU ${report_type === 'fuel_eu' ? 'FuelEU Maritime' : 'ETS'} compliance summary
-for Minoan Lines S.A. fleet of ${data.length} vessels.
-Fleet total CO2: ${totalCO2} tons. Average CII score: ${avgCII}.
-Include key findings, regulatory compliance status, and 3 improvement recommendations.
-Keep it professional and under 400 words.`;
+    const isETS = report_type !== 'fuel_eu';
+    const reportTitle = isETS ? 'EU Emissions Trading System (EU ETS)' : 'FuelEU Maritime Regulation';
+
+    const prompt = `You are a senior maritime compliance officer preparing an official ${reportTitle} report for Minoan Lines S.A.
+
+Fleet data for ${data.length} vessels:
+Total CO2 emissions: ${totalCO2} metric tons
+Total ETS allowances required: ${totalETS} units
+Average CII score: ${avgCII}
+Average GHG intensity: ${avgGHG} gCO2e/MJ
+FuelEU rating distribution: ${Object.entries(ratingDist).map(([r, c]) => `${c} vessels rated ${r}`).join(', ')}
+Individual vessels: ${vesselSummary}
+
+Write a formal compliance report with the following sections. Use plain prose throughout. Do not use any hashtags, asterisks, bullet symbols, dashes as list markers, or markdown formatting of any kind. Do not use emojis. Write in full paragraphs as a professional document would appear.
+
+The report must include:
+1. Executive Summary — overall compliance status, key metrics, and regulatory standing
+2. Key Performance Indicators — present CII score, GHG intensity, ETS exposure, and fleet rating as narrative KPI commentary
+3. Vessel Performance Analysis — identify top and bottom performers with specific data
+4. Regulatory Compliance Status — assess compliance with ${isETS ? 'EU ETS Phase 4 obligations and 2024 maritime inclusion' : 'FuelEU Maritime Regulation 2025 GHG intensity requirements'}
+5. Financial Exposure — estimate ETS cost exposure and potential penalty risk in euros
+6. Strategic Recommendations — three specific, actionable recommendations with expected impact
+
+Keep the total length under 500 words. Write as a human compliance expert, not as an AI assistant.`;
 
     const completion = await deepseek.chat.completions.create({
       model: DEEPSEEK_MODEL,
       messages: [{ role: 'user', content: prompt }],
-      max_tokens: 700,
+      max_tokens: 900,
     });
 
-    const reportText = completion.choices[0].message.content || '';
+    let reportText = completion.choices[0].message.content || '';
+    // Strip any residual markdown symbols
+    reportText = reportText.replace(/#{1,6}\s/g, '').replace(/\*{1,3}([^*]+)\*{1,3}/g, '$1').replace(/^\s*[-*+]\s/gm, '').replace(/`([^`]+)`/g, '$1');
 
-    // Save to Supabase — non-fatal
     let reportId: string | undefined;
     try {
       const db = supabaseAdmin();

@@ -11,26 +11,63 @@
   --brand-light: #E8F0FB;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
   font-family: 'Inter', system-ui, sans-serif;
   background: #F3F4F6;
+  transition: background 0.2s, color 0.2s;
 }
+
+html.dark body { background: #0f172a; color: #f1f5f9; }
 
 @layer components {
   .card {
-    @apply bg-white rounded-xl border border-gray-200 shadow-sm;
+    @apply bg-white rounded-xl border border-gray-200 shadow-sm
+           dark:bg-slate-800 dark:border-slate-700;
   }
   .btn-primary {
-    @apply bg-[#003087] text-white px-4 py-2 rounded-lg font-medium hover:bg-[#001A4D] transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply bg-[#003087] text-white px-4 py-2 rounded-lg font-medium
+           hover:bg-[#001A4D] transition-colors
+           disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .btn-secondary {
-    @apply bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors;
+    @apply bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium
+           hover:bg-gray-200 transition-colors
+           dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600;
   }
   .badge {
     @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  .page-title {
+    @apply text-xl font-bold text-[#001A4D] dark:text-slate-100;
+  }
+  .section-title {
+    @apply font-semibold text-gray-900 dark:text-slate-100;
+  }
+  .body-text {
+    @apply text-gray-700 dark:text-slate-300;
+  }
+  .muted-text {
+    @apply text-gray-500 dark:text-slate-400;
+  }
+  .form-input {
+    @apply border border-gray-300 rounded-lg px-3 py-2 text-sm
+           focus:outline-none focus:ring-2 focus:ring-[#003087]
+           bg-white text-gray-900
+           dark:bg-slate-900 dark:border-slate-600 dark:text-slate-100
+           dark:focus:ring-blue-500;
+  }
+  .table-header {
+    @apply bg-gray-50 dark:bg-slate-900;
+  }
+  .table-row {
+    @apply hover:bg-gray-50 dark:hover:bg-slate-700/50;
+  }
+  .table-cell {
+    @apply px-4 py-3 text-gray-600 dark:text-slate-300;
+  }
+  .divider {
+    @apply border-gray-200 dark:border-slate-700;
   }
 }

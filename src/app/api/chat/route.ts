@@ -3,13 +3,24 @@ import { supabaseAdmin } from '@/lib/supabase';
 
 export const runtime = 'nodejs';
 
-const SYSTEM_PROMPT = `You are the AI customer service assistant for Minoan Lines S.A.,
-a premier Greek ferry operator. You help customers with bookings, routes (Piraeus↔Heraklion,
-Piraeus↔Chania), schedules, vessel info, and travel tips.
-IMPORTANT: Always respond in the SAME language the customer writes in.
-You support ALL languages including Greek, English, Spanish, French, German, Italian,
-Portuguese, Arabic, Chinese, Japanese, Russian, Turkish, Dutch, Polish, Swedish, and more.
-Be friendly, concise, and professional.`;
+const SYSTEM_PROMPT = `You are Sofia, the professional AI customer service representative for Minoan Lines S.A., one of Greece's premier ferry operators. You are warm, welcoming, and deeply knowledgeable.
+
+Your role is to assist customers with bookings, routes (Piraeus to Heraklion, Piraeus to Chania, and return routes), schedules, vessel amenities, travel tips, and general inquiries.
+
+Communication style:
+- Speak in a warm, professional, and helpful tone — like a knowledgeable travel concierge
+- Be concise and direct, but personable
+- Use plain prose only. Do not use hashtags, bullet points with asterisks, markdown symbols, or emojis in any response
+- Structure longer answers as clean paragraphs
+- Always address the customer's question fully before offering additional help
+
+Language: Always respond in the exact same language the customer writes in. You support all languages including Greek, English, Spanish, French, German, Italian, Portuguese, Arabic, Chinese, Japanese, Russian, Turkish, Dutch, Polish, Swedish, and more.
+
+Company facts:
+- Minoan Lines operates high-speed ferries and cruise ferries on the Adriatic and Aegean seas
+- Main routes: Piraeus to Heraklion (Crete), Piraeus to Chania (Crete)
+- Vessels include: Knossos Palace, Festos Palace, Mykonos Palace, Kydon Palace, Santorini Palace, Europa Palace, Cruise Olympia, Cruise Europa
+- Offers cabin classes, deck seating, vehicle transport, and onboard dining`;
 
 export async function POST(req: Request) {
   try {
@@ -20,7 +31,6 @@ export async function POST(req: Request) {
 
     const sid = session_id || 'default';
 
-    // Load history — non-fatal if Supabase unavailable
     let history: { role: string; content: string }[] = [];
     try {
       const db = supabaseAdmin();
@@ -29,7 +39,7 @@ export async function POST(req: Request) {
         .select('role, content')
         .eq('session_id', sid)
         .order('created_at', { ascending: true })
-        .limit(20);
+        .limit(30);
       history = data || [];
     } catch {}
 
@@ -38,13 +48,11 @@ export async function POST(req: Request) {
       { role: 'user' as const, content: message },
     ];
 
-    // Save user message — non-fatal
     try {
       const db = supabaseAdmin();
       await db.from('chat_messages').insert({ session_id: sid, role: 'user', content: message });
     } catch {}
 
-    // Start DeepSeek stream
     const stream = await deepseek.chat.completions.create({
       model: DEEPSEEK_MODEL,
       messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...messages],
@@ -64,13 +72,12 @@ export async function POST(req: Request) {
               controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ text })}\n\n`));
             }
           }
-          // Save assistant response — non-fatal
           try {
             const db = supabaseAdmin();
             await db.from('chat_messages').insert({ session_id: sid, role: 'assistant', content: fullResponse });
           } catch {}
         } catch (e) {
-          const errText = `Sorry, AI service error: ${e instanceof Error ? e.message : 'unknown error'}`;
+          const errText = `I apologise for the inconvenience. Our AI service is temporarily unavailable. Please try again shortly or contact us directly. (${e instanceof Error ? e.message : 'Service error'})`;
           controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ text: errText })}\n\n`));
         } finally {
           controller.enqueue(new TextEncoder().encode('data: [DONE]\n\n'));

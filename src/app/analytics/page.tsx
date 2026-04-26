@@ -58,7 +58,7 @@ export default function AnalyticsPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <BarChart2 className="w-5 h-5 text-[#003087]" />
-          <h1 className="text-xl font-bold text-[#001A4D]">{t('analytics.title')}</h1>
+          <h1 className="text-xl font-bold text-[#001A4D] dark:text-slate-100">{t('analytics.title')}</h1>
         </div>
         <button onClick={load} className="btn-secondary flex items-center gap-1.5 text-sm">
           <RefreshCw className="w-4 h-4" />{t('analytics.refresh')}
@@ -74,10 +74,10 @@ export default function AnalyticsPage() {
             { label: t('analytics.forecastAccuracy'), value: s.forecast_accuracy, icon: BarChart2 },
           ].map(({ label, value, icon: Icon }) => (
             <div key={label} className="card p-4">
-              <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
-                <Icon className="w-4 h-4 text-[#003087]" />{label}
+              <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-slate-400 mb-1">
+                <Icon className="w-4 h-4 text-[#003087] dark:text-blue-400" />{label}
               </div>
-              <div className="text-xl font-bold text-gray-900 truncate">{value}</div>
+              <div className="text-xl font-bold text-gray-900 dark:text-slate-100 truncate">{value}</div>
             </div>
           ))}
         </div>
@@ -85,9 +85,9 @@ export default function AnalyticsPage() {
 
       <div className="card p-4 space-y-4">
         <div className="flex items-center justify-between flex-wrap gap-3">
-          <h2 className="font-semibold text-gray-900">{t('analytics.forecastTitle')}</h2>
+          <h2 className="font-semibold text-gray-900 dark:text-slate-100">{t('analytics.forecastTitle')}</h2>
           <select value={selected} onChange={e => setSelected(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#003087]">
+            className="border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#003087] bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100">
             {data?.routes.map(r => (
               <option key={r.route} value={r.route}>{r.route.replace('-', ' → ')}</option>
             ))}
@@ -117,15 +117,17 @@ export default function AnalyticsPage() {
       <div className="card p-4 space-y-3">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-[#C9A84C]" />
-          <h2 className="font-semibold text-gray-900">{t('analytics.aiInsights')}</h2>
+          <h2 className="font-semibold text-gray-900 dark:text-slate-100">{t('analytics.aiInsights')}</h2>
         </div>
         <button onClick={generateInsights} disabled={generating} className="btn-primary flex items-center gap-2 text-sm">
           {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
           {generating ? t('common.loading') : `${t('analytics.generateInsights')} ${selected.replace('-', ' → ')}`}
         </button>
-        {insightError && <div className="bg-red-50 text-red-700 rounded-lg p-3 text-sm">⚠️ {insightError}</div>}
+        {insightError && <div className="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-lg p-3 text-sm">{insightError}</div>}
         {insights && (
-          <div className="bg-gray-50 rounded-lg p-4 text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{insights}</div>
+          <div className="bg-gray-50 dark:bg-slate-900 rounded-lg p-5 text-sm text-gray-800 dark:text-slate-200 whitespace-pre-wrap leading-relaxed border-l-4 border-[#C9A84C]" style={{ fontFamily: 'Georgia, serif', lineHeight: '1.8' }}>
+            {insights}
+          </div>
         )}
       </div>
     </div>
