@@ -2,23 +2,22 @@
 import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, Send, Bot, User, Loader2 } from 'lucide-react';
 import { clsx } from 'clsx';
+import { useTranslation } from 'react-i18next';
 
 type Message = { role: 'user' | 'assistant'; content: string; id: string };
 
-const SESSION_ID = typeof window !== 'undefined' ? (sessionStorage.getItem('chat_sid') || (() => {
+const getSessionId = () => {
+  if (typeof window === 'undefined') return 'default';
+  const key = 'chat_sid';
+  const existing = sessionStorage.getItem(key);
+  if (existing) return existing;
   const id = Math.random().toString(36).slice(2);
-  sessionStorage.setItem('chat_sid', id);
+  sessionStorage.setItem(key, id);
   return id;
-})()) : 'default';
-
-const SUGGESTIONS = [
-  'What routes does Minoan Lines operate?',
-  'Πότε φεύγει το επόμενο πλοίο για Ηράκλειο;',
-  'What are the cabin options available?',
-  'How early should I arrive at the port?',
-];
+};
 
 export default function ChatPage() {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [streaming, setStreaming] = useState(false);
@@ -26,6 +25,8 @@ export default function ChatPage() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
+
+  const suggestions: string[] = t('chat.suggestions', { returnObjects: true }) as string[];
 
   async function send(text?: string) {
     const msg = text || input.trim();
@@ -40,10 +41,15 @@ export default function ChatPage() {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: msg, session_id: SESSION_ID }),
+        body: JSON.stringify({ message: msg, session_id: getSessionId() }),
       });
 
-      const reader = res.body!.getReader();
+      if (!res.ok || !res.body) {
+        const err = await res.text();
+        throw new Error(err);
+      }
+
+      const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buffer = '';
 
@@ -53,24 +59,22 @@ export default function ChatPage() {
         buffer += decoder.decode(value, { stream: true });
         const lines = buffer.split('\n');
         buffer = lines.pop() || '';
-
         for (const line of lines) {
           if (!line.startsWith('data: ')) continue;
           const data = line.slice(6);
           if (data === '[DONE]') break;
           try {
             const { text } = JSON.parse(data);
-            if (text) {
-              setMessages(prev => prev.map(m =>
-                m.id === assistantId ? { ...m, content: m.content + text } : m
-              ));
-            }
+            if (text) setMessages(prev => prev.map(m =>
+              m.id === assistantId ? { ...m, content: m.content + text } : m
+            ));
           } catch {}
         }
       }
     } catch (e) {
+      const errMsg = e instanceof Error ? e.message : 'Error';
       setMessages(prev => prev.map(m =>
-        m.id === assistantId ? { ...m, content: 'Sorry, an error occurred. Please try again.' } : m
+        m.id === assistantId ? { ...m, content: `⚠️ ${errMsg}` } : m
       ));
     } finally {
       setStreaming(false);
@@ -82,7 +86,7 @@ export default function ChatPage() {
     <div className="flex flex-col h-[calc(100vh-8rem)]">
       <div className="flex items-center gap-2 mb-4">
         <MessageCircle className="w-5 h-5 text-[#003087]" />
-        <h1 className="text-xl font-bold text-[#001A4D]">AI Customer Agent</h1>
+        <h1 className="text-xl font-bold text-[#001A4D]">{t('chat.title')}</h1>
         <span className="badge bg-green-100 text-green-700 ml-auto">DeepSeek AI</span>
       </div>
 
@@ -91,9 +95,9 @@ export default function ChatPage() {
           {messages.length === 0 && (
             <div className="text-center py-8 space-y-4">
               <Bot className="w-12 h-12 text-[#C9A84C] mx-auto" />
-              <p className="text-gray-500 text-sm">Ask me anything about Minoan Lines — Greek or English!</p>
+              <p className="text-gray-500 text-sm">Ask me anything about Minoan Lines — in any language!</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-lg mx-auto">
-                {SUGGESTIONS.map(s => (
+                {suggestions.map((s: string) => (
                   <button key={s} onClick={() => send(s)}
                     className="text-xs bg-blue-50 text-blue-700 p-2.5 rounded-lg hover:bg-blue-100 transition-colors text-left">
                     {s}
@@ -107,7 +111,9 @@ export default function ChatPage() {
             <div key={m.id} className={clsx('flex gap-3', m.role === 'user' && 'flex-row-reverse')}>
               <div className={clsx('w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0',
                 m.role === 'user' ? 'bg-[#003087]' : 'bg-[#C9A84C]')}>
-                {m.role === 'user' ? <User className="w-4 h-4 text-white" /> : <Bot className="w-4 h-4 text-white" />}
+                {m.role === 'user'
+                  ? <User className="w-4 h-4 text-white" />
+                  : <Bot className="w-4 h-4 text-white" />}
               </div>
               <div className={clsx('max-w-[80%] rounded-xl px-4 py-2.5 text-sm',
                 m.role === 'user' ? 'bg-[#003087] text-white' : 'bg-gray-100 text-gray-800')}>
@@ -122,14 +128,10 @@ export default function ChatPage() {
 
         <div className="border-t p-4">
           <form onSubmit={e => { e.preventDefault(); send(); }} className="flex gap-2">
-            <input
-              ref={inputRef}
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              placeholder="Type your message..."
+            <input ref={inputRef} value={input} onChange={e => setInput(e.target.value)}
+              placeholder={t('chat.placeholder')}
               className="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003087]"
-              disabled={streaming}
-            />
+              disabled={streaming} />
             <button type="submit" disabled={!input.trim() || streaming} className="btn-primary flex items-center gap-1">
               {streaming ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
             </button>
