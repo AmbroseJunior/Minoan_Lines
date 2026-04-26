@@ -28,6 +28,8 @@ create table if not exists helpdesk_tickets (
   priority text default 'medium',
   status text default 'open',
   reported_by text default 'Anonymous',
+  booking_reference text,
+  ticket_number text,
   suggested_response text,
   estimated_resolution_hours int default 24,
   resolution_notes text,

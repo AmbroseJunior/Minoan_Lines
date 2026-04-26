@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
-import { Headphones, Plus, RefreshCw, AlertCircle, Clock, CheckCircle, X, Loader2 } from 'lucide-react';
+import { Headphones, Plus, RefreshCw, AlertCircle, Clock, CheckCircle, X, Loader2, Ticket, Hash } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useTranslation } from 'react-i18next';
 
@@ -8,6 +8,7 @@ type Ticket = {
   id: string; title: string; description: string; category: string;
   priority: string; status: string; reported_by: string;
   suggested_response: string; estimated_resolution_hours: number; created_at: string;
+  booking_reference?: string; ticket_number?: string;
 };
 
 const priorityColor = (p: string) =>
@@ -22,7 +23,7 @@ export default function HelpdeskPage() {
   const [creating, setCreating] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [filterStatus, setFilterStatus] = useState('');
-  const [form, setForm] = useState({ title: '', description: '', reported_by: '' });
+  const [form, setForm] = useState({ title: '', description: '', reported_by: '', booking_reference: '', ticket_number: '' });
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [fetchError, setFetchError] = useState('');
 
@@ -51,7 +52,7 @@ export default function HelpdeskPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed');
-      setForm({ title: '', description: '', reported_by: '' });
+      setForm({ title: '', description: '', reported_by: '', booking_reference: '', ticket_number: '' });
       setShowForm(false);
       load();
     } catch (e) {
@@ -103,6 +104,20 @@ export default function HelpdeskPage() {
             <input value={form.reported_by} onChange={e => setForm(f => ({ ...f, reported_by: e.target.value }))}
               placeholder={tr('helpdesk.nameLabel')}
               className="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003087] bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100" />
+            <div className="grid grid-cols-2 gap-2">
+              <div className="relative">
+                <Ticket className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+                <input value={form.booking_reference} onChange={e => setForm(f => ({ ...f, booking_reference: e.target.value }))}
+                  placeholder={tr('helpdesk.bookingRef')}
+                  className="w-full border border-gray-300 dark:border-slate-600 rounded-lg pl-8 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003087] bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100" />
+              </div>
+              <div className="relative">
+                <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+                <input value={form.ticket_number} onChange={e => setForm(f => ({ ...f, ticket_number: e.target.value }))}
+                  placeholder={tr('helpdesk.ticketNumber')}
+                  className="w-full border border-gray-300 dark:border-slate-600 rounded-lg pl-8 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#003087] bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100" />
+              </div>
+            </div>
             <button type="submit" disabled={creating} className="btn-primary flex items-center gap-2 text-sm">
               {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
               {tr('helpdesk.submit')}
@@ -163,6 +178,16 @@ export default function HelpdeskPage() {
 
               {expandedId === ticket.id && (
                 <div className="px-4 pb-4 space-y-3 border-t border-gray-100 dark:border-slate-700 pt-3">
+                  {(ticket.booking_reference || ticket.ticket_number) && (
+                    <div className="flex gap-3 text-xs text-gray-500 dark:text-slate-400">
+                      {ticket.booking_reference && (
+                        <span className="flex items-center gap-1"><Ticket className="w-3 h-3" />{ticket.booking_reference}</span>
+                      )}
+                      {ticket.ticket_number && (
+                        <span className="flex items-center gap-1"><Hash className="w-3 h-3" />{ticket.ticket_number}</span>
+                      )}
+                    </div>
+                  )}
                   <p className="text-sm text-gray-600 dark:text-slate-300">{ticket.description}</p>
                   {ticket.suggested_response && (
                     <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 text-sm text-blue-800 dark:text-blue-300">

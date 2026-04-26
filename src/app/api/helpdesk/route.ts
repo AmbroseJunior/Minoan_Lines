@@ -22,7 +22,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { title, description, category = 'general', reported_by = 'Anonymous' } = body;
+    const { title, description, category = 'general', reported_by = 'Anonymous', booking_reference, ticket_number } = body;
     if (!title || !description) {
       return NextResponse.json({ error: 'title and description required' }, { status: 400 });
     }
@@ -58,6 +58,8 @@ Return: {"priority": "critical|high|medium|low", "category": "network|hardware|s
       priority: triage.priority,
       status: 'open',
       reported_by,
+      booking_reference: booking_reference || null,
+      ticket_number: ticket_number || null,
       suggested_response: triage.suggested_response,
       estimated_resolution_hours: triage.estimated_resolution_hours,
       created_at: new Date().toISOString(),
