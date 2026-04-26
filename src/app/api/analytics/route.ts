@@ -54,7 +54,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const { route, horizon_days = 30 } = await req.json().catch(() => ({}));
+    const { route, horizon_days = 30, language = 'en', language_label = 'English' } = await req.json().catch(() => ({}));
     const targetRoute = route || ROUTES[0];
     const forecast = generateForecast(targetRoute, Math.min(horizon_days, 90));
     const avgPass = Math.round(forecast.reduce((s, f) => s + f.predicted_passengers, 0) / forecast.length);
@@ -69,6 +69,8 @@ export async function POST(req: Request) {
     const demandVariance = Math.round(((peakDay.predicted_passengers - lowDay.predicted_passengers) / lowDay.predicted_passengers) * 100);
 
     const aiPrompt = `You are a senior maritime revenue analyst for Minoan Lines S.A. Prepare a professional demand intelligence report for the route ${targetRoute.replace('-', ' to ')}.
+Write the entire report in ${language_label}. Every section and sentence must be in ${language_label} only.
+
 
 Forecast data for the next ${horizon_days} days:
 - Average daily passengers: ${avgPass}

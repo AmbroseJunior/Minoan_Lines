@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
-import { FileText, RefreshCw, Download, Mail, AlertTriangle, CheckCircle, Loader2, X, Send } from 'lucide-react';
+import { FileText, RefreshCw, Download, Mail, AlertTriangle, CheckCircle, Loader2, X, Send, Languages } from 'lucide-react';
+import { REPORT_LANGUAGES, languageLabel } from '@/lib/reportLanguages';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { clsx } from 'clsx';
 import { useTranslation } from 'react-i18next';
@@ -113,7 +114,7 @@ async function downloadPDF(reportType: string, content: string, vessels: VesselD
 }
 
 export default function CompliancePage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [data, setData] = useState<ComplianceData | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -123,6 +124,7 @@ export default function CompliancePage() {
   const [reportVessels, setReportVessels] = useState<VesselData[]>([]);
   const [reportError, setReportError] = useState('');
   const [reportType, setReportType] = useState<'eu_ets' | 'fuel_eu'>('eu_ets');
+  const [reportLang, setReportLang] = useState(() => i18n.language?.slice(0, 2) || 'en');
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [emailTo, setEmailTo] = useState('');
   const [emailStatus, setEmailStatus] = useState('');
@@ -143,7 +145,7 @@ export default function CompliancePage() {
       const res = await fetch('/api/compliance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ report_type: reportType }),
+        body: JSON.stringify({ report_type: reportType, language: reportLang, language_label: languageLabel(reportLang) }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Failed');
@@ -283,6 +285,15 @@ export default function CompliancePage() {
             <option value="eu_ets">{t('compliance.euEts')}</option>
             <option value="fuel_eu">{t('compliance.fuelEu')}</option>
           </select>
+          <div className="flex items-center gap-1.5 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 bg-white dark:bg-slate-900">
+            <Languages className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+            <select value={reportLang} onChange={e => setReportLang(e.target.value)}
+              className="text-sm focus:outline-none bg-transparent text-gray-900 dark:text-slate-100">
+              {REPORT_LANGUAGES.map(l => (
+                <option key={l.code} value={l.code}>{l.label}</option>
+              ))}
+            </select>
+          </div>
           <button onClick={generateReport} disabled={generating} className="btn-primary flex items-center gap-2 text-sm">
             {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
             {generating ? t('compliance.generating') : t('compliance.generateReport')}

@@ -40,7 +40,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const { report_type = 'eu_ets' } = await req.json().catch(() => ({}));
+    const { report_type = 'eu_ets', language = 'en', language_label = 'English' } = await req.json().catch(() => ({}));
     const data = buildComplianceData();
 
     const totalCO2 = data.reduce((s, v) => s + v.co2_emissions_tons, 0).toFixed(1);
@@ -54,6 +54,8 @@ export async function POST(req: Request) {
     const reportTitle = isETS ? 'EU Emissions Trading System (EU ETS)' : 'FuelEU Maritime Regulation';
 
     const prompt = `You are a senior maritime compliance officer preparing an official ${reportTitle} report for Minoan Lines S.A.
+Write the entire report in ${language_label}. Every section, heading, and sentence must be in ${language_label} only.
+
 
 Fleet data for ${data.length} vessels:
 Total CO2 emissions: ${totalCO2} metric tons

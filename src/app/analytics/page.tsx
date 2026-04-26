@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
-import { BarChart2, TrendingUp, Users, DollarSign, RefreshCw, Loader2, Sparkles } from 'lucide-react';
+import { BarChart2, TrendingUp, Users, DollarSign, RefreshCw, Loader2, Sparkles, Languages } from 'lucide-react';
+import { REPORT_LANGUAGES, languageLabel } from '@/lib/reportLanguages';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { useTranslation } from 'react-i18next';
 
@@ -9,13 +10,14 @@ type RouteStats = { route: string; avg_daily_passengers: number; weekly_forecast
 type Analytics = { routes: RouteStats[]; summary: { total_weekly_passengers: number; total_weekly_revenue_eur: number; peak_route: string; forecast_accuracy: string }; generated_at: string };
 
 export default function AnalyticsPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [data, setData] = useState<Analytics | null>(null);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState('');
   const [insights, setInsights] = useState('');
   const [insightError, setInsightError] = useState('');
   const [generating, setGenerating] = useState(false);
+  const [insightLang, setInsightLang] = useState(() => i18n.language?.slice(0, 2) || 'en');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -38,7 +40,7 @@ export default function AnalyticsPage() {
       const res = await fetch('/api/analytics', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ route: selected, horizon_days: 30 }),
+        body: JSON.stringify({ route: selected, horizon_days: 30, language: insightLang, language_label: languageLabel(insightLang) }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Failed');
@@ -119,10 +121,21 @@ export default function AnalyticsPage() {
           <Sparkles className="w-4 h-4 text-[#C9A84C]" />
           <h2 className="font-semibold text-gray-900 dark:text-slate-100">{t('analytics.aiInsights')}</h2>
         </div>
-        <button onClick={generateInsights} disabled={generating} className="btn-primary flex items-center gap-2 text-sm">
-          {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-          {generating ? t('common.loading') : `${t('analytics.generateInsights')} ${selected.replace('-', ' → ')}`}
-        </button>
+        <div className="flex gap-3 items-center flex-wrap">
+          <div className="flex items-center gap-1.5 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 bg-white dark:bg-slate-900">
+            <Languages className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+            <select value={insightLang} onChange={e => setInsightLang(e.target.value)}
+              className="text-sm focus:outline-none bg-transparent text-gray-900 dark:text-slate-100">
+              {REPORT_LANGUAGES.map(l => (
+                <option key={l.code} value={l.code}>{l.label}</option>
+              ))}
+            </select>
+          </div>
+          <button onClick={generateInsights} disabled={generating} className="btn-primary flex items-center gap-2 text-sm">
+            {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+            {generating ? t('common.loading') : `${t('analytics.generateInsights')} ${selected.replace('-', ' → ')}`}
+          </button>
+        </div>
         {insightError && <div className="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-lg p-3 text-sm">{insightError}</div>}
         {insights && (
           <div className="bg-gray-50 dark:bg-slate-900 rounded-lg p-5 text-sm text-gray-800 dark:text-slate-200 whitespace-pre-wrap leading-relaxed border-l-4 border-[#C9A84C]" style={{ fontFamily: 'Georgia, serif', lineHeight: '1.8' }}>
