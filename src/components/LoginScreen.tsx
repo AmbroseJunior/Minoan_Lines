@@ -141,7 +141,7 @@ export default function LoginScreen() {
           {/* Security notice */}
           <div className="flex items-center justify-center gap-2 mt-5 text-blue-300/70 text-xs">
             <ShieldCheck className="w-3.5 h-3.5" />
-            <span>Secured by Supabase · TLS encrypted · Authorised access only</span>
+            <span>Secured by IntegraMindAI · TLS encrypted · Authorised access only</span>
           </div>
         </div>
       </div>
