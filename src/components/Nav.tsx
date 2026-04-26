@@ -2,15 +2,17 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
-import { Ship, MessageCircle, FileText, Headphones, BarChart2, Sun, Moon, Ticket, LayoutDashboard, Activity } from 'lucide-react';
+import { Ship, MessageCircle, FileText, Headphones, BarChart2, Sun, Moon, Ticket, LayoutDashboard, Activity, LogOut } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
 import { useTheme } from './ThemeProvider';
+import { useAuth } from './AuthProvider';
 
 export default function Nav() {
   const path = usePathname();
   const { t } = useTranslation();
   const { theme, toggle } = useTheme();
+  const { user, signOut } = useAuth();
 
   const links = [
     { href: '/vessels', label: t('nav.vessels'), icon: Ship },
@@ -68,6 +70,12 @@ export default function Nav() {
                 {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
               </button>
               <LanguageSwitcher />
+              {user && (
+                <button onClick={signOut} title={`Sign out (${user.email})`}
+                  className="p-1.5 rounded-lg text-blue-200 hover:text-red-300 hover:bg-white/10 transition-colors">
+                  <LogOut className="w-4 h-4" />
+                </button>
+              )}
             </div>
           </div>
         </div>
