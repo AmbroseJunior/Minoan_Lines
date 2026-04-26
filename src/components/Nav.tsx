@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Ship, MessageCircle, FileText, Headphones, BarChart2, Anchor, Sun, Moon } from 'lucide-react';
+import { Ship, MessageCircle, FileText, Headphones, BarChart2, Anchor, Sun, Moon, Ticket } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
 import { useTheme } from './ThemeProvider';
@@ -40,6 +40,19 @@ export default function Nav() {
                 <span className="hidden lg:inline">{label}</span>
               </Link>
             ))}
+
+            {/* Book CTA */}
+            <Link
+              href="/book"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ml-1
+                ${path?.startsWith('/book')
+                  ? 'bg-[#C9A84C] text-white'
+                  : 'bg-[#C9A84C]/20 text-[#C9A84C] hover:bg-[#C9A84C] hover:text-white border border-[#C9A84C]/40'}`}
+            >
+              <Ticket className="w-4 h-4" />
+              <span className="hidden sm:inline">Book</span>
+            </Link>
+
             <div className="ml-1 border-l border-white/20 pl-2 flex items-center gap-1">
               <button
                 onClick={toggle}

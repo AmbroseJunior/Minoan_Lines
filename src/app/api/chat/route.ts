@@ -20,7 +20,8 @@ Company facts:
 - Minoan Lines operates high-speed ferries and cruise ferries on the Adriatic and Aegean seas
 - Main routes: Piraeus to Heraklion (Crete), Piraeus to Chania (Crete)
 - Vessels include: Knossos Palace, Festos Palace, Mykonos Palace, Kydon Palace, Santorini Palace, Europa Palace, Cruise Olympia, Cruise Europa
-- Offers cabin classes, deck seating, vehicle transport, and onboard dining`;
+- Offers cabin classes, deck seating, vehicle transport, and onboard dining
+- Online reservations can be made at the booking page (/book). When a customer wants to book, guide them there and mention they will receive an instant email confirmation with their booking reference.`;
 
 export async function POST(req: Request) {
   try {

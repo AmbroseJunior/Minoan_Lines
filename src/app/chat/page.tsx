@@ -83,16 +83,34 @@ export default function ChatPage() {
     if (!ttsEnabled || typeof window === 'undefined') return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
+    const langCode = (i18n.language || 'en').split('-')[0];
     utterance.lang = i18n.language || 'en';
     utterance.rate = 0.95;
-    utterance.pitch = 1.1;
-    // prefer a female voice if available
-    const voices = window.speechSynthesis.getVoices();
-    const femaleVoice = voices.find(v =>
-      v.lang.startsWith(i18n.language?.split('-')[0] || 'en') &&
-      /female|woman|zira|samantha|victoria|karen|moira|tessa|fiona/i.test(v.name)
-    ) || voices.find(v => v.lang.startsWith(i18n.language?.split('-')[0] || 'en'));
-    if (femaleVoice) utterance.voice = femaleVoice;
+    utterance.pitch = 1.05;
+
+    const selectVoice = () => {
+      const voices = window.speechSynthesis.getVoices();
+      if (!voices.length) return;
+      // 1. Female voice in exact language match
+      const femaleExact = voices.find(v =>
+        (v.lang === i18n.language || v.lang.startsWith(langCode)) &&
+        /female|woman|zira|samantha|victoria|karen|moira|tessa|fiona|google/i.test(v.name)
+      );
+      // 2. Any voice in the target language
+      const anyLang = voices.find(v => v.lang.startsWith(langCode));
+      // 3. Any Google or online voice as fallback
+      const googleFallback = voices.find(v => /google/i.test(v.name));
+      const chosen = femaleExact || anyLang || googleFallback;
+      if (chosen) utterance.voice = chosen;
+    };
+
+    // Voices may load asynchronously on first call
+    if (window.speechSynthesis.getVoices().length > 0) {
+      selectVoice();
+    } else {
+      window.speechSynthesis.onvoiceschanged = () => { selectVoice(); window.speechSynthesis.onvoiceschanged = null; };
+    }
+
     window.speechSynthesis.speak(utterance);
   }, [ttsEnabled, i18n.language]);
 
