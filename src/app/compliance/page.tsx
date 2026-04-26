@@ -23,6 +23,66 @@ function barColor(rating: string) {
   return '#dc2626';
 }
 
+const NON_LATIN_LANGS = new Set(['el', 'ru', 'uk', 'ar', 'zh', 'ja', 'ko', 'hi']);
+
+function printReport(reportType: string, content: string, vessels: VesselData[], lang: string) {
+  const title = reportType === 'fuel_eu' ? 'FuelEU Maritime Compliance Report' : 'EU ETS Compliance Report';
+  const date = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+  const isRTL = lang === 'ar';
+  const vesselRows = vessels.map((v, i) => `
+    <tr style="background:${i % 2 === 0 ? '#f8fafc' : '#fff'}">
+      <td style="padding:8px 12px;font-weight:600">${v.vessel}</td>
+      <td style="padding:8px 12px;text-align:center">${v.fuel_consumption_tons}</td>
+      <td style="padding:8px 12px;text-align:center">${v.co2_emissions_tons}</td>
+      <td style="padding:8px 12px;text-align:center">${v.cii_score}</td>
+      <td style="padding:8px 12px;text-align:center">
+        <span style="background:${v.fueleu_rating === 'A' ? '#dcfce7' : v.fueleu_rating === 'B' ? '#dbeafe' : v.fueleu_rating === 'C' ? '#fef9c3' : '#fee2e2'};padding:2px 10px;border-radius:999px;font-weight:700;font-size:12px">${v.fueleu_rating}</span>
+      </td>
+    </tr>`).join('');
+
+  const html = `<!DOCTYPE html><html dir="${isRTL ? 'rtl' : 'ltr'}">
+<head><meta charset="utf-8"><title>${title}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&family=Noto+Sans+Arabic:wght@400;700&family=Noto+Sans+SC:wght@400;700&family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+KR:wght@400;700&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans','Noto Sans Arabic','Noto Sans SC','Noto Sans JP',system-ui,sans-serif; background:#fff; color:#111827; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .header { background:#001A4D; color:#fff; padding:28px 40px; }
+  .header-brand { color:#C9A84C; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; margin-bottom:6px; }
+  .header-title { font-size:22px; font-weight:700; }
+  .header-sub { color:#93c5fd; font-size:13px; margin-top:6px; }
+  .body { padding:32px 40px; }
+  .report-text { background:#f0f9ff; border-left:4px solid #003087; padding:20px 24px; border-radius:0 8px 8px 0; font-size:14px; line-height:1.8; color:#1e3a5f; white-space:pre-wrap; margin-bottom:28px; font-family:Georgia,serif; }
+  h2 { font-size:15px; font-weight:700; color:#001A4D; margin-bottom:14px; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  thead tr { background:#001A4D; color:#fff; }
+  thead th { padding:10px 12px; text-align:${isRTL ? 'right' : 'left'}; font-weight:600; font-size:12px; letter-spacing:.03em; }
+  .footer { margin-top:32px; padding:16px 40px; background:#f9fafb; border-top:1px solid #e5e7eb; font-size:11px; color:#9ca3af; text-align:center; }
+  @media print { @page { size: A4; margin: 0; } }
+</style></head>
+<body>
+  <div class="header">
+    <div class="header-brand">⚓ Minoan Lines S.A. · Compliance Department</div>
+    <div class="header-title">${title}</div>
+    <div class="header-sub">${date} · Prepared by IntegraMind AI</div>
+  </div>
+  <div class="body">
+    <div class="report-text">${content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+    <h2>Fleet Compliance Data</h2>
+    <table>
+      <thead><tr>
+        <th>Vessel</th><th style="text-align:center">Fuel (t)</th><th style="text-align:center">CO₂ (t)</th><th style="text-align:center">CII Score</th><th style="text-align:center">FuelEU</th>
+      </tr></thead>
+      <tbody>${vesselRows}</tbody>
+    </table>
+  </div>
+  <div class="footer">Minoan Lines S.A. · EU Compliance Report · Powered by IntegraMind AI · integramindai.com</div>
+  <script>window.onload = () => { window.print(); }<\/script>
+</body></html>`;
+
+  const w = window.open('', '_blank', 'width=900,height=700');
+  if (w) { w.document.write(html); w.document.close(); }
+}
+
 async function downloadPDF(reportType: string, content: string, vessels: VesselData[]) {
   const { jsPDF } = await import('jspdf');
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -308,11 +368,21 @@ export default function CompliancePage() {
               {reportText}
             </div>
 
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-2 flex-wrap items-center">
+              {NON_LATIN_LANGS.has(reportLang) && (
+                <span className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2.5 py-1.5 rounded-lg border border-amber-200 dark:border-amber-800">
+                  Use Print / Save as PDF for best results in this language
+                </span>
+              )}
               <button onClick={handleDownload} disabled={downloading}
                 className="flex items-center gap-2 px-4 py-2 bg-[#003087] text-white rounded-lg text-sm font-medium hover:bg-[#001A4D] transition-colors disabled:opacity-50">
                 {downloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
                 Download PDF
+              </button>
+              <button onClick={() => printReport(reportType, reportText, reportVessels, reportLang)}
+                className="flex items-center gap-2 px-4 py-2 bg-slate-700 text-white rounded-lg text-sm font-medium hover:bg-slate-800 transition-colors">
+                <Download className="w-4 h-4" />
+                Print / Save as PDF
               </button>
               <button onClick={() => { setShowEmailForm(!showEmailForm); setEmailStatus(''); }}
                 className="flex items-center gap-2 px-4 py-2 bg-[#C9A84C] text-white rounded-lg text-sm font-medium hover:bg-amber-600 transition-colors">
