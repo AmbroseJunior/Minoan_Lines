@@ -1,6 +1,6 @@
 'use client';
 import { createContext, useContext, useEffect, useState } from 'react';
-import type { User } from '@supabase/supabase-js';
+import type { User, Session, AuthChangeEvent } from '@supabase/supabase-js';
 import { getSupabaseBrowser } from '@/lib/supabaseClient';
 import LoginScreen from './LoginScreen';
 
@@ -19,7 +19,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       setUser(data.session?.user ?? null);
       setChecking(false);
     });
-    const { data: { subscription } } = db.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = db.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
       setUser(session?.user ?? null);
     });
     return () => subscription.unsubscribe();
