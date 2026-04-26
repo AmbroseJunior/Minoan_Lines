@@ -3,7 +3,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
-import { Ship, MessageCircle, FileText, Headphones, BarChart2, Sun, Moon, Ticket, LayoutDashboard, Activity, LogOut, Menu, X } from 'lucide-react';
+import { Ship, MessageCircle, FileText, Headphones, BarChart2, Sun, Moon, Ticket, LayoutDashboard, Activity, LogOut, Menu, X, Shield } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
 import { useTheme } from './ThemeProvider';
@@ -15,6 +15,7 @@ export default function Nav() {
   const { theme, toggle } = useTheme();
   const { user, signOut } = useAuth();
   const [open, setOpen] = useState(false);
+  if (path?.startsWith('/embed')) return null;
 
   const links = [
     { href: '/vessels', label: t('nav.vessels'), icon: Ship },
@@ -24,6 +25,7 @@ export default function Nav() {
     { href: '/analytics', label: t('nav.analytics'), icon: BarChart2 },
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/health', label: 'Health', icon: Activity },
+    { href: '/audit', label: 'Audit', icon: Shield },
   ];
 
   const linkClass = (href: string) =>

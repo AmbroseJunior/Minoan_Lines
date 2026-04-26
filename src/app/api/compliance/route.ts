@@ -97,6 +97,13 @@ Keep the total length under 500 words. Write as a human compliance expert, not a
         generated_at: new Date().toISOString(),
       }).select('id').single();
       reportId = saved?.id;
+      await db.from('audit_log').insert({
+        event_type: 'report_generated',
+        module: 'compliance',
+        summary: `${report_type === 'fuel_eu' ? 'FuelEU Maritime' : 'EU ETS'} report generated in ${language_label}`,
+        metadata: { report_type, language, vessels: data.length },
+        created_at: new Date().toISOString(),
+      });
     } catch {}
 
     return NextResponse.json({

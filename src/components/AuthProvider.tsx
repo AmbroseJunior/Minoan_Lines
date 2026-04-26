@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import type { User, Session, AuthChangeEvent } from '@supabase/supabase-js';
 import { getSupabaseBrowser } from '@/lib/supabaseClient';
 import LoginScreen from './LoginScreen';
+import { usePathname } from 'next/navigation';
 
 type AuthCtx = { user: User | null; signOut: () => Promise<void> };
 const AuthContext = createContext<AuthCtx>({ user: null, signOut: async () => {} });
@@ -10,10 +11,13 @@ const AuthContext = createContext<AuthCtx>({ user: null, signOut: async () => {}
 export function useAuth() { return useContext(AuthContext); }
 
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
   const [user, setUser]       = useState<User | null>(null);
   const [checking, setChecking] = useState(true);
+  const isEmbed = pathname?.startsWith('/embed');
 
   useEffect(() => {
+    if (isEmbed) return;
     const db = getSupabaseBrowser();
     db.auth.getSession().then(({ data }: { data: { session: { user: import('@supabase/supabase-js').User } | null } }) => {
       setUser(data.session?.user ?? null);
@@ -29,6 +33,8 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     await getSupabaseBrowser().auth.signOut();
     setUser(null);
   }
+
+  if (isEmbed) return <>{children}</>;
 
   if (checking) {
     return (

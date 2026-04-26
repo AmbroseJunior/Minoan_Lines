@@ -1,8 +1,10 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
-import { Headphones, Plus, RefreshCw, AlertCircle, Clock, CheckCircle, X, Loader2, Ticket, Hash } from 'lucide-react';
+import { Headphones, Plus, RefreshCw, AlertCircle, Clock, CheckCircle, X, Loader2, Ticket, Hash, BarChart2, ChevronDown } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useTranslation } from 'react-i18next';
+import dynamic from 'next/dynamic';
+const HelpdeskSLA = dynamic(() => import('@/components/HelpdeskSLA'), { ssr: false });
 
 type Ticket = {
   id: string; title: string; description: string; category: string;
@@ -26,6 +28,7 @@ export default function HelpdeskPage() {
   const [form, setForm] = useState({ title: '', description: '', reported_by: '', booking_reference: '', ticket_number: '' });
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [fetchError, setFetchError] = useState('');
+  const [showSLA, setShowSLA] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true); setFetchError('');
@@ -79,6 +82,11 @@ export default function HelpdeskPage() {
           <h1 className="text-xl font-bold text-[#001A4D] dark:text-slate-100">{tr('helpdesk.title')}</h1>
         </div>
         <div className="flex gap-2">
+          <button onClick={() => setShowSLA(s => !s)} className="btn-secondary flex items-center gap-1.5 text-sm">
+            <BarChart2 className="w-4 h-4" />
+            <span className="hidden sm:inline">SLA</span>
+            <ChevronDown className={clsx('w-3.5 h-3.5 transition-transform', showSLA && 'rotate-180')} />
+          </button>
           <button onClick={load} className="btn-secondary flex items-center gap-1.5 text-sm">
             <RefreshCw className={clsx('w-4 h-4', loading && 'animate-spin')} />
           </button>
@@ -87,6 +95,8 @@ export default function HelpdeskPage() {
           </button>
         </div>
       </div>
+
+      {showSLA && <HelpdeskSLA />}
 
       {showForm && (
         <div className="card p-4 space-y-3">
