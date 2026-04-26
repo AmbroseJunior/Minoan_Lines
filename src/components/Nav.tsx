@@ -1,7 +1,8 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Ship, MessageCircle, FileText, Headphones, BarChart2, Anchor, Sun, Moon, Ticket, LayoutDashboard, Activity } from 'lucide-react';
+import Image from 'next/image';
+import { Ship, MessageCircle, FileText, Headphones, BarChart2, Sun, Moon, Ticket, LayoutDashboard, Activity } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
 import { useTheme } from './ThemeProvider';
@@ -23,10 +24,8 @@ export default function Nav() {
     <nav className="bg-[#001A4D] text-white shadow-lg">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-14">
-          <Link href="/" className="flex items-center gap-2 font-bold text-base flex-shrink-0">
-            <Anchor className="w-5 h-5 text-[#C9A84C]" />
-            <span className="hidden sm:inline">Minoan Lines AI</span>
-            <span className="sm:hidden">ML</span>
+          <Link href="/" className="flex items-center flex-shrink-0">
+            <Image src="/minoan-logo.svg" alt="Minoan Lines" width={140} height={35} className="h-9 w-auto" priority />
           </Link>
           <div className="flex items-center gap-1">
             {links.map(({ href, label, icon: Icon }) => (

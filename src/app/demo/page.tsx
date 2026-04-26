@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { Ship, MessageCircle, FileText, Headphones, BarChart2, Ticket, CheckCircle, ArrowRight, Anchor, Zap, Globe, Mail, Calendar, ShieldCheck, Activity, AlertTriangle, Clock, TrendingUp, Users } from 'lucide-react';
+import Image from 'next/image';
+import { Ship, MessageCircle, FileText, Headphones, BarChart2, Ticket, CheckCircle, ArrowRight, Zap, Globe, Mail, Calendar, ShieldCheck, Activity, AlertTriangle, Clock, TrendingUp, Users } from 'lucide-react';
 
 const modules = [
   {
@@ -87,11 +88,11 @@ export default function DemoPage() {
       {/* Hero */}
       <div className="card overflow-hidden">
         <div className="bg-[#001A4D] px-8 py-10">
-          <div className="flex items-center gap-3 mb-6">
-            <Anchor className="w-8 h-8 text-[#C9A84C]" />
-            <div>
-              <div className="text-[#C9A84C] text-xs font-bold uppercase tracking-widest">Minoan Lines S.A.</div>
-              <div className="text-white text-2xl font-bold">AI Operations Platform</div>
+          <div className="flex items-center gap-4 mb-6">
+            <Image src="/minoan-logo.svg" alt="Minoan Lines" width={200} height={50} className="h-12 w-auto" priority />
+            <div className="border-l border-white/20 pl-4">
+              <div className="text-[#C9A84C] text-xs font-bold uppercase tracking-widest">AI Operations Platform</div>
+              <div className="text-white text-xl font-bold mt-0.5">Executive Presentation</div>
             </div>
           </div>
           <p className="text-blue-200 text-base leading-relaxed max-w-2xl">

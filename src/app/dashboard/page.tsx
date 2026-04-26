@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Ship, FileText, BarChart2, Headphones, MessageCircle, TrendingUp, AlertTriangle, CheckCircle, Users, DollarSign, RefreshCw, Loader2, Activity, Zap, ShieldCheck } from 'lucide-react';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from 'recharts';
 import Link from 'next/link';
+import Image from 'next/image';
 import { clsx } from 'clsx';
 
 type VesselData = { name: string; status: string; delay_probability: number; speed_knots: number; route: string };
@@ -69,11 +70,14 @@ export default function DashboardPage() {
     <div className="space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-[#001A4D] dark:text-slate-100">Executive Overview</h1>
-          <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5">
-            Minoan Lines AI Platform · {lastRefresh ? `Updated ${lastRefresh.toLocaleTimeString()}` : 'Loading...'}
-          </p>
+        <div className="flex items-center gap-4">
+          <Image src="/minoan-logo.svg" alt="Minoan Lines" width={160} height={40} className="h-10 w-auto hidden sm:block" />
+          <div>
+            <h1 className="text-xl font-bold text-[#001A4D] dark:text-slate-100">Executive Overview</h1>
+            <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
+              AI Operations Platform · {lastRefresh ? `Updated ${lastRefresh.toLocaleTimeString()}` : 'Loading...'}
+            </p>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <Link href="/demo" className="flex items-center gap-1.5 px-3 py-2 bg-[#C9A84C] text-white rounded-lg text-sm font-medium hover:bg-amber-600 transition-colors">
