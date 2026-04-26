@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
-import { Ship, FileText, BarChart2, Headphones, MessageCircle, TrendingUp, AlertTriangle, CheckCircle, Users, DollarSign, RefreshCw, Loader2, Activity, Zap } from 'lucide-react';
+import { Ship, FileText, BarChart2, Headphones, MessageCircle, TrendingUp, AlertTriangle, CheckCircle, Users, DollarSign, RefreshCw, Loader2, Activity, Zap, ShieldCheck } from 'lucide-react';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from 'recharts';
 import Link from 'next/link';
 import { clsx } from 'clsx';
@@ -18,24 +18,27 @@ export default function DashboardPage() {
   const [compSummary, setCompSummary] = useState<ComplianceSummary | null>(null);
   const [analytics, setAnalytics] = useState<{ routes: RouteStats[]; summary: AnalyticsSummary } | null>(null);
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [health, setHealth] = useState<{ overall: string; uptime_pct: string; summary: { total: number; healthy: number; degraded: number; down: number } } | null>(null);
   const [loading, setLoading] = useState(true);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [vRes, cRes, aRes, hRes] = await Promise.all([
+      const [vRes, cRes, aRes, hRes, hlRes] = await Promise.all([
         fetch('/api/vessels'),
         fetch('/api/compliance'),
         fetch('/api/analytics'),
         fetch('/api/helpdesk'),
+        fetch('/api/health'),
       ]);
-      const [v, c, a, h] = await Promise.all([vRes.json(), cRes.json(), aRes.json(), hRes.json()]);
+      const [v, c, a, h, hl] = await Promise.all([vRes.json(), cRes.json(), aRes.json(), hRes.json(), hlRes.json()]);
       setVessels(Array.isArray(v) ? v : []);
       setCompVessels(c.vessels || []);
       setCompSummary(c.fleet_summary || null);
       setAnalytics(a);
       setTickets(Array.isArray(h) ? h : []);
+      setHealth(hl?.overall ? hl : null);
       setLastRefresh(new Date());
     } catch {}
     finally { setLoading(false); }
@@ -228,6 +231,41 @@ export default function DashboardPage() {
               ))}
             </div>
           </div>
+
+          {/* Infrastructure Health Widget */}
+          <Link href="/health" className="card p-4 block hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-[#003087] dark:text-blue-400" />
+                <h2 className="font-semibold text-gray-900 dark:text-slate-100">Infrastructure</h2>
+              </div>
+              <span className={clsx(
+                'flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full',
+                health?.overall === 'healthy' ? 'bg-green-50 dark:bg-green-900/20 text-green-600' :
+                health?.overall === 'degraded' ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-600' :
+                'bg-gray-100 dark:bg-slate-700 text-gray-400'
+              )}>
+                <span className={clsx('w-1.5 h-1.5 rounded-full animate-pulse',
+                  health?.overall === 'healthy' ? 'bg-green-500' :
+                  health?.overall === 'degraded' ? 'bg-amber-500' : 'bg-gray-400'
+                )} />
+                {health?.overall ? health.overall.charAt(0).toUpperCase() + health.overall.slice(1) : 'Unknown'}
+              </span>
+            </div>
+            <div className="grid grid-cols-3 gap-2 text-center">
+              {[
+                { label: 'Healthy', value: health?.summary.healthy ?? '—', color: 'text-green-600' },
+                { label: 'Degraded', value: health?.summary.degraded ?? '—', color: 'text-amber-500' },
+                { label: 'Down', value: health?.summary.down ?? '—', color: 'text-red-500' },
+              ].map(({ label, value, color }) => (
+                <div key={label} className="bg-gray-50 dark:bg-slate-800 rounded-lg p-2">
+                  <div className={clsx('text-lg font-bold', color)}>{value}</div>
+                  <div className="text-[10px] text-gray-500 dark:text-slate-400">{label}</div>
+                </div>
+              ))}
+            </div>
+            {health && <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-2 text-center">{health.uptime_pct}% uptime · View details →</p>}
+          </Link>
 
           <div className="card p-4">
             <div className="flex items-center justify-between mb-3">

@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Ship, MessageCircle, FileText, Headphones, BarChart2, Anchor, Sun, Moon, Ticket, LayoutDashboard } from 'lucide-react';
+import { Ship, MessageCircle, FileText, Headphones, BarChart2, Anchor, Sun, Moon, Ticket, LayoutDashboard, Activity } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
 import { useTheme } from './ThemeProvider';
@@ -44,6 +44,14 @@ export default function Nav() {
                 ${path?.startsWith('/dashboard') ? 'bg-[#003087] text-white' : 'text-blue-200 hover:text-white hover:bg-white/10'}`}>
               <LayoutDashboard className="w-4 h-4" />
               <span className="hidden xl:inline">Dashboard</span>
+            </Link>
+
+            {/* Health */}
+            <Link href="/health"
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium transition-colors
+                ${path?.startsWith('/health') ? 'bg-[#003087] text-white' : 'text-blue-200 hover:text-white hover:bg-white/10'}`}>
+              <Activity className="w-4 h-4" />
+              <span className="hidden xl:inline">Health</span>
             </Link>
 
             {/* Book CTA */}

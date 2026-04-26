@@ -60,3 +60,30 @@ alter table vessel_positions enable row level security;
 -- Allow service role full access (already default)
 -- Allow anon read vessel positions
 create policy "public read vessels" on vessel_positions for select using (true);
+
+-- Audit log (infrastructure monitoring)
+create table if not exists audit_log (
+  id uuid primary key default gen_random_uuid(),
+  event_type text not null,
+  module text not null,
+  summary text not null,
+  metadata jsonb default '{}',
+  created_at timestamptz default now()
+);
+create index on audit_log(module, created_at desc);
+create index on audit_log(event_type, created_at desc);
+alter table audit_log enable row level security;
+
+-- Alert rules storage
+create table if not exists alert_rules (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  rule_key text unique not null,
+  enabled boolean default true,
+  severity text default 'warning',
+  notify_email text,
+  last_triggered timestamptz,
+  trigger_count int default 0,
+  created_at timestamptz default now()
+);
+alter table alert_rules enable row level security;
