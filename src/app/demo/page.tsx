@@ -15,11 +15,11 @@ const modules = [
   {
     icon: Ship,
     title: 'Vessel Operations',
-    subtitle: 'Real-Time Fleet Intelligence',
+    subtitle: 'Live Fleet Map with Departure & Arrival Times',
     color: 'bg-blue-600',
-    impact: 'Live visibility across the entire fleet with AI-powered delay prediction',
-    metrics: ['8 vessels tracked in real time', 'Delay probability per vessel', 'Speed, fuel, and route data', 'AIS-ready architecture'],
-    value: 'Enables proactive passenger communications before disruptions escalate',
+    impact: 'Live Aegean Sea map showing exact vessel positions, routes, and real-time ETAs',
+    metrics: ['Interactive map — all 8 vessels plotted live', 'Departure and arrival times per vessel', 'Delay probability with colour-coded risk', 'Speed, fuel consumption, and heading data'],
+    value: 'Ops team sees the full fleet at a glance — click any vessel to see its schedule and delay risk instantly',
     href: '/vessels',
   },
   {
@@ -75,7 +75,7 @@ const modules = [
 ];
 
 const roadmap = [
-  { phase: 'Phase 1', label: 'Current', items: ['All 7 modules live', 'AI chat in 20 languages', 'EU compliance reports', 'Infrastructure health monitoring', 'Ferry booking with email'] },
+  { phase: 'Phase 1', label: 'Current', items: ['All 7 modules live', 'Live vessel map with ETAs', 'AI chat in 20 languages', 'EU compliance reports', 'Infrastructure health monitoring', 'Ferry booking with email'] },
   { phase: 'Phase 2', label: '30–60 days', items: ['Live AIS feed integration', 'Real booking system API', 'Automated disruption alerts to passengers', 'Scheduled Grimaldi Group reports'] },
   { phase: 'Phase 3', label: '60–120 days', items: ['Grimaldi Group portal integration', 'Cargo workflow automation', 'Revenue management AI', 'Full SSO & access control'] },
 ];
