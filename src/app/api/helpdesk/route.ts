@@ -114,6 +114,21 @@ Return: {"priority": "critical|high|medium|low", "category": "network|hardware|s
   }
 }
 
+export async function DELETE(req: Request) {
+  try {
+    const url = new URL(req.url);
+    const id = url.searchParams.get('id');
+    if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
+    const db = supabaseAdmin();
+    const { error } = await db.from('helpdesk_tickets').delete().eq('id', id);
+    if (error) throw new Error(error.message);
+    await writeAudit('ticket_deleted', `Ticket ${id} deleted`, { id });
+    return NextResponse.json({ success: true });
+  } catch (e) {
+    return NextResponse.json({ error: e instanceof Error ? e.message : 'Failed to delete ticket' }, { status: 500 });
+  }
+}
+
 export async function PATCH(req: Request) {
   try {
     const body = await req.json();

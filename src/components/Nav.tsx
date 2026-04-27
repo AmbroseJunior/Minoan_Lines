@@ -3,7 +3,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
-import { Ship, MessageCircle, FileText, Headphones, BarChart2, Sun, Moon, Ticket, LayoutDashboard, Activity, LogOut, Menu, X, Shield } from 'lucide-react';
+import { Ship, MessageCircle, FileText, Headphones, BarChart2, Sun, Moon, Ticket, LayoutDashboard, Activity, LogOut, Menu, X, Shield, Presentation } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
 import { useTheme } from './ThemeProvider';
@@ -26,14 +26,26 @@ export default function Nav() {
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/health', label: 'Health', icon: Activity },
     { href: '/audit', label: 'Audit', icon: Shield },
+    { href: '/demo', label: 'Pitch', icon: Presentation },
   ];
 
   const linkClass = (href: string) =>
-    `flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors
-    ${path?.startsWith(href) ? 'bg-[#003087] text-white' : 'text-blue-200 hover:text-white hover:bg-white/10'}`;
+    `flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all
+    ${path?.startsWith(href)
+      ? 'text-white shadow-inner'
+      : 'text-blue-200 hover:text-white hover:bg-white/10'}`;
+
+  const activeLinkStyle = (href: string): React.CSSProperties =>
+    path?.startsWith(href)
+      ? { background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.08) 100%)', border: '1px solid rgba(255,255,255,0.15)' }
+      : {};
 
   return (
-    <nav className="bg-[#001A4D] text-white shadow-lg relative z-50">
+    <nav className="text-white relative z-50"
+      style={{
+        background: 'linear-gradient(135deg, #001A4D 0%, #002a70 100%)',
+        boxShadow: '0 2px 20px rgba(0,26,77,0.35), 0 1px 0 rgba(201,168,76,0.2)',
+      }}>
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-14">
 
@@ -45,7 +57,7 @@ export default function Nav() {
           {/* Desktop links */}
           <div className="hidden md:flex items-center gap-0.5">
             {links.map(({ href, label, icon: Icon }) => (
-              <Link key={href} href={href} className={linkClass(href)}>
+              <Link key={href} href={href} className={linkClass(href)} style={activeLinkStyle(href)}>
                 <Icon className="w-4 h-4 flex-shrink-0" />
                 <span className="hidden lg:inline">{label}</span>
               </Link>
@@ -90,7 +102,8 @@ export default function Nav() {
 
       {/* Mobile dropdown */}
       {open && (
-        <div className="md:hidden border-t border-white/10 bg-[#001A4D] px-4 py-3 space-y-1">
+        <div className="md:hidden border-t border-white/10 px-4 py-3 space-y-1 nav-dropdown"
+          style={{ background: 'linear-gradient(180deg, #001A4D 0%, #002060 100%)' }}>
           {links.map(({ href, label, icon: Icon }) => (
             <Link key={href} href={href} onClick={() => setOpen(false)}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors

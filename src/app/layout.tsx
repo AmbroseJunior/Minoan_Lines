@@ -5,6 +5,7 @@ import I18nProvider from '@/components/I18nProvider';
 import ThemeProvider from '@/components/ThemeProvider';
 import AuthProvider from '@/components/AuthProvider';
 import MainWrapper from '@/components/MainWrapper';
+import GlobalChatWidget from '@/components/GlobalChatWidget';
 
 export const metadata: Metadata = {
   title: 'Minoan Lines AI Platform',
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <AuthProvider>
               <Nav />
               <main><MainWrapper>{children}</MainWrapper></main>
+              <GlobalChatWidget />
             </AuthProvider>
           </I18nProvider>
         </ThemeProvider>

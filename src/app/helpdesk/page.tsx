@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
-import { Headphones, Plus, RefreshCw, AlertCircle, Clock, CheckCircle, X, Loader2, Ticket, Hash, BarChart2, ChevronDown } from 'lucide-react';
+import { Headphones, Plus, RefreshCw, AlertCircle, Clock, CheckCircle, X, Loader2, Ticket, Hash, BarChart2, ChevronDown, Trash2 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useTranslation } from 'react-i18next';
 import dynamic from 'next/dynamic';
@@ -69,6 +69,13 @@ export default function HelpdeskPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, status }),
     });
+    load();
+  }
+
+  async function deleteTicket(id: string) {
+    if (!confirm('Delete this ticket? This cannot be undone.')) return;
+    await fetch(`/api/helpdesk?id=${id}`, { method: 'DELETE' });
+    setExpandedId(null);
     load();
   }
 
@@ -204,21 +211,27 @@ export default function HelpdeskPage() {
                       <strong>{tr('helpdesk.aiSuggested')}:</strong> {ticket.suggested_response}
                     </div>
                   )}
-                  {ticket.status !== 'resolved' && (
-                    <div className="flex gap-2 flex-wrap">
-                      {ticket.status === 'open' && (
-                        <button onClick={() => updateStatus(ticket.id, 'in_progress')} className="btn-secondary text-xs py-1.5">
-                          {tr('helpdesk.markInProgress')}
+                  <div className="flex gap-2 flex-wrap items-center">
+                    {ticket.status !== 'resolved' && (
+                      <>
+                        {ticket.status === 'open' && (
+                          <button onClick={() => updateStatus(ticket.id, 'in_progress')} className="btn-secondary text-xs py-1.5">
+                            {tr('helpdesk.markInProgress')}
+                          </button>
+                        )}
+                        <button onClick={() => updateStatus(ticket.id, 'resolved')} className="btn-primary text-xs py-1.5 bg-green-600 hover:bg-green-700">
+                          {tr('helpdesk.markResolved')}
                         </button>
-                      )}
-                      <button onClick={() => updateStatus(ticket.id, 'resolved')} className="btn-primary text-xs py-1.5 bg-green-600 hover:bg-green-700">
-                        {tr('helpdesk.markResolved')}
-                      </button>
-                      <button onClick={() => updateStatus(ticket.id, 'escalated')} className="btn-secondary text-xs py-1.5 text-red-600 dark:text-red-400">
-                        {tr('helpdesk.escalate')}
-                      </button>
-                    </div>
-                  )}
+                        <button onClick={() => updateStatus(ticket.id, 'escalated')} className="btn-secondary text-xs py-1.5 text-red-600 dark:text-red-400">
+                          {tr('helpdesk.escalate')}
+                        </button>
+                      </>
+                    )}
+                    <button onClick={() => deleteTicket(ticket.id)}
+                      className="ml-auto flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 border border-red-200 dark:border-red-800 transition-colors">
+                      <Trash2 className="w-3 h-3" /> Delete
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

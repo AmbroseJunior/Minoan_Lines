@@ -1,518 +1,422 @@
-import Link from 'next/link';
-import Image from 'next/image';
-import { Ship, MessageCircle, FileText, Headphones, BarChart2, Ticket, CheckCircle, ArrowRight, Zap, Globe, Mail, Calendar, ShieldCheck, Activity, AlertTriangle, Clock, TrendingUp, Users, Building2, MapPin, Anchor } from 'lucide-react';
+'use client';
+import { useState } from 'react';
+import dynamic from 'next/dynamic';
+import {
+  Ship, Brain, BarChart2, FileText, Headphones, Shield, Activity,
+  ChevronDown, ChevronRight, CheckCircle, AlertCircle, TrendingUp,
+  Globe, Zap, Lock, Users, ArrowRight, Star, Target, Layers,
+  MessageCircle, Clock, MapPin
+} from 'lucide-react';
 
-const modules = [
+const QRCodeSVG = dynamic(() => import('qrcode.react').then(m => m.QRCodeSVG), { ssr: false });
+
+const APP_URL = 'https://minoan-lines.vercel.app';
+
+const PHASES = [
   {
-    icon: MessageCircle,
-    title: 'AI Customer Agent',
-    subtitle: 'Sofia — Multilingual 24/7 Support',
-    color: 'bg-purple-600',
-    impact: 'Handles 80% of routine enquiries without human intervention',
-    metrics: ['20 languages supported', 'Voice input & spoken responses', 'Full conversation history saved', 'Average response under 2 seconds'],
-    value: 'Reduces customer service headcount requirement and eliminates after-hours missed contacts',
-    href: '/chat',
+    phase: '0', label: 'Foundation', status: 'live', color: '#16a34a', bg: 'bg-green-50', border: 'border-green-200',
+    period: 'Live — April 2026',
+    items: [
+      'AI Customer Assistant (24/7 SSE streaming, 20 languages)',
+      'EU ETS & FuelEU Maritime Compliance Reports (multi-language PDF)',
+      'IT Helpdesk with AI Triage, SLA Dashboard & Email Alerts',
+      'Fleet Vessel Tracking Dashboard',
+      'Audit Log & Activity Timeline',
+      'Health Monitoring & API Status',
+      'Role-based Auth (Supabase), Dark Mode, Responsive PWA',
+    ],
   },
   {
-    icon: Ship,
-    title: 'Vessel Operations',
-    subtitle: 'Live Fleet Map with Departure & Arrival Times',
-    color: 'bg-blue-600',
-    impact: 'Live Aegean Sea map showing exact vessel positions, routes, and real-time ETAs',
-    metrics: ['Interactive map — all 8 vessels plotted live', 'Departure and arrival times per vessel', 'Delay probability with colour-coded risk', 'Speed, fuel consumption, and heading data'],
-    value: 'Ops team sees the full fleet at a glance — click any vessel to see its schedule and delay risk instantly',
-    href: '/vessels',
+    phase: '1', label: 'Intelligence', status: 'next', color: '#2563eb', bg: 'bg-blue-50', border: 'border-blue-200',
+    period: 'Q3 2026',
+    items: [
+      'Predictive Maintenance Engine (anomaly detection on vessel sensor data)',
+      'Crew Scheduling AI with fatigue & certification compliance',
+      'Dynamic Fuel Optimisation per route & sea conditions',
+      'Passenger Sentiment Analysis from feedback streams',
+    ],
   },
   {
-    icon: FileText,
-    title: 'EU Compliance',
-    subtitle: 'EU ETS & FuelEU Maritime Automation',
-    color: 'bg-green-600',
-    impact: 'Generates regulatory-grade compliance reports in seconds instead of days',
-    metrics: ['EU ETS & FuelEU Maritime coverage', 'CII scoring per vessel', 'PDF download + email delivery', 'GHG intensity tracking'],
-    value: 'Eliminates manual reporting burden and ensures executive-level visibility before regulatory deadlines',
-    href: '/compliance',
+    phase: '2', label: 'Automation', status: 'planned', color: '#7c3aed', bg: 'bg-purple-50', border: 'border-purple-200',
+    period: 'Q4 2026',
+    items: [
+      'Automated ETS Allowance Purchasing (threshold-triggered)',
+      'Fleet-wide Consolidated Compliance Reporting',
+      'Real-time Port Authority Data Integration (SafeSeaNet)',
+      'Cargo & Freight Revenue Optimisation Module',
+    ],
   },
   {
-    icon: Headphones,
-    title: 'IT Helpdesk',
-    subtitle: 'AI-Triaged Ticket Management',
-    color: 'bg-orange-600',
-    impact: 'AI triage assigns priority and suggests responses at the moment of ticket creation',
-    metrics: ['Automatic priority classification', 'AI-generated resolution suggestions', 'Status workflow management', 'SLA breach detection'],
-    value: 'Eliminates manual sorting and misrouted tickets — your IT team resolves instead of reads',
-    href: '/helpdesk',
-  },
-  {
-    icon: ShieldCheck,
-    title: 'Infrastructure Monitoring',
-    subtitle: 'Real-Time System Health & Alert Rules',
-    color: 'bg-slate-700',
-    impact: 'Proactive monitoring across all platform services with automated email alerts',
-    metrics: ['7 services monitored continuously', 'Auto-refresh every 30 seconds', '5 alert rules with email notification', 'Full audit log of every event'],
-    value: 'IT team knows about failures before users do — shift from reactive firefighting to proactive management',
-    href: '/health',
-  },
-  {
-    icon: BarChart2,
-    title: 'Demand Analytics',
-    subtitle: 'Revenue Intelligence & Forecasting',
-    color: 'bg-rose-600',
-    impact: '30-day passenger demand forecasts with profit opportunity and risk analysis',
-    metrics: ['Route-level revenue forecasting', 'Weekend vs weekday demand split', 'Risk/reward ratio per route', 'Estimated revenue loss if unactioned'],
-    value: 'Gives revenue management the quantified intelligence to act before demand shifts occur',
-    href: '/analytics',
-  },
-  {
-    icon: Ticket,
-    title: 'Ferry Booking',
-    subtitle: 'Digital Reservation with Instant Confirmation',
-    color: 'bg-amber-600',
-    impact: 'End-to-end booking flow with professional email confirmation delivered instantly',
-    metrics: ['4 routes, 4 cabin classes', 'Vehicle transport included', 'Branded booking reference', 'Automated email confirmation'],
-    value: 'Foundation for full end-to-end booking automation integrated with the Grimaldi Group reservation system',
-    href: '/book',
+    phase: '3', label: 'Group Scale', status: 'vision', color: '#C9A84C', bg: 'bg-amber-50', border: 'border-amber-200',
+    period: '2027',
+    items: [
+      'Grimaldi Group Fleet Integration (50+ vessels)',
+      'Cross-fleet Compliance Consolidation for Group HQ',
+      'Multi-entity Audit & Governance Dashboard',
+      'Group-level AI Decision Support for Executives',
+    ],
   },
 ];
 
-const roadmap = [
-  { phase: 'Phase 1', label: 'Current', items: ['All 7 modules live', 'Live vessel map with ETAs', 'AI chat in 20 languages', 'EU compliance reports', 'Infrastructure health monitoring', 'Ferry booking with email'] },
-  { phase: 'Phase 2', label: '30–60 days', items: ['Live AIS feed integration', 'Real booking system API', 'Automated disruption alerts to passengers', 'Scheduled Grimaldi Group reports'] },
-  { phase: 'Phase 3', label: '60–120 days', items: ['Grimaldi Group portal integration', 'Cargo workflow automation', 'Revenue management AI', 'Full SSO & access control'] },
+const QA = [
+  {
+    q: 'We are in a very busy period with many projects ongoing.',
+    a: 'I know — and that is exactly why the compliance pilot is designed to take zero time from your team. I do the implementation. You review the output. Two weeks. That is all I need from you.',
+  },
+  {
+    q: 'We already have systems handling some of this.',
+    a: 'That is good to hear. Can you tell me which parts? Because what I have built does not replace your existing systems — it sits on top of them and automates the data collection and reporting layer that those systems still leave manual.',
+  },
+  {
+    q: 'We need to involve procurement / legal / management.',
+    a: 'Absolutely — and the pilot is designed to give you something concrete to show them. Rather than approving a concept, they will be approving results. Let me show you the output first.',
+  },
+  {
+    q: 'What about data security and GDPR?',
+    a: 'Critical question — and I am glad you raised it. The platform is built on EU-hosted infrastructure. All passenger data stays within your own systems. The AI layer processes operational and compliance data only — no PII is ever exposed to external systems.',
+  },
+  {
+    q: 'We would need to present this to Grimaldi Group.',
+    a: 'That is actually an opportunity I welcome. The compliance automation module was designed with the Grimaldi Group reporting structure in mind — automated consolidated reports going up the chain. Minoan Lines becomes the proof of concept for the whole group.',
+  },
+  {
+    q: 'How is this different from what the big vendors offer?',
+    a: 'The big vendors sell you a platform and then charge you six figures to configure it for your fleet. What you have here is already configured, already running, already generating your EU ETS reports. The difference is six months and €200,000 in implementation costs — saved.',
+  },
 ];
+
+const COSTS = [
+  { label: 'Compliance Pilot (4 weeks)', price: '€4,900', note: 'EU ETS + FuelEU reports, full setup, zero IT involvement required', highlight: false },
+  { label: 'Full Platform — Year 1', price: '€18,000', note: 'All Phase 0 modules + Phase 1 rollout + dedicated support', highlight: true },
+  { label: 'Grimaldi Group License', price: 'Custom', note: 'Group-wide deployment, consolidated reporting, executive dashboard', highlight: false },
+];
+
+const DELIVERED = [
+  { icon: MessageCircle, label: 'AI Chat', desc: '24/7 customer assistant, 20 languages' },
+  { icon: FileText, label: 'Compliance', desc: 'EU ETS & FuelEU Maritime PDF reports' },
+  { icon: Headphones, label: 'Helpdesk', desc: 'AI triage, SLA tracking, email alerts' },
+  { icon: Ship, label: 'Fleet', desc: 'Vessel dashboard, real-time status' },
+  { icon: Shield, label: 'Audit', desc: 'Full activity log & governance timeline' },
+  { icon: Activity, label: 'Health', desc: 'API & platform monitoring' },
+];
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex items-center gap-2 mb-3">
+      <span className="h-px w-8 bg-[#C9A84C]" />
+      <span className="text-[#C9A84C] text-xs font-semibold uppercase tracking-widest">{children}</span>
+    </div>
+  );
+}
 
 export default function DemoPage() {
+  const [openQA, setOpenQA] = useState<number | null>(null);
+  const [openPhase, setOpenPhase] = useState<number | null>(0);
+
   return (
-    <div className="max-w-5xl mx-auto space-y-12 py-4">
+    <div className="min-h-screen font-sans" style={{ background: 'linear-gradient(180deg, #f0f4ff 0%, #f8faff 100%)' }}>
 
       {/* Hero */}
-      <div className="card overflow-hidden">
-        <div className="bg-[#001A4D] px-8 py-10">
-          <div className="flex items-center gap-4 mb-6">
-            <Image src="/minoan-logo.svg" alt="Minoan Lines" width={200} height={50} className="h-12 w-auto" priority />
-            <div className="border-l border-white/20 pl-4">
-              <div className="text-[#C9A84C] text-xs font-bold uppercase tracking-widest">AI Operations Platform</div>
-              <div className="text-white text-xl font-bold mt-0.5">Executive Presentation</div>
+      <section className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #001A4D 0%, #003087 60%, #0047CC 100%)' }}>
+        <div className="absolute inset-0 opacity-5 pointer-events-none"
+          style={{ backgroundImage: 'radial-gradient(circle at 20% 80%, #C9A84C 0%, transparent 50%), radial-gradient(circle at 80% 20%, #4a9eff 0%, transparent 50%)' }} />
+        <div className="max-w-5xl mx-auto px-6 py-20 relative">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-10">
+            <div className="flex-1">
+              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur rounded-full px-4 py-1.5 mb-6 border border-white/20">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-emerald-300 text-xs font-semibold tracking-wide">LIVE PLATFORM — APRIL 2026</span>
+              </div>
+              <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight mb-4">
+                The Intelligence Layer<br />
+                <span style={{ color: '#C9A84C' }}>Minoan Lines</span> Needed.
+              </h1>
+              <p className="text-blue-200 text-lg leading-relaxed mb-6 max-w-xl">
+                Built in production. Saving hours today. Designed to scale across the Grimaldi Group tomorrow.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <a href={APP_URL} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all hover:scale-105"
+                  style={{ background: '#C9A84C', color: '#001A4D' }}>
+                  <Zap className="w-4 h-4" /> Open Live Platform
+                </a>
+                <a href="#offer"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-all">
+                  See the Offer <ArrowRight className="w-4 h-4" />
+                </a>
+              </div>
+            </div>
+
+            {/* QR Code */}
+            <div className="flex-shrink-0 flex flex-col items-center gap-3">
+              <div className="bg-white rounded-2xl p-4 shadow-2xl">
+                <QRCodeSVG value={APP_URL} size={140} fgColor="#001A4D" bgColor="#ffffff" />
+              </div>
+              <p className="text-blue-200 text-xs text-center font-medium">Scan to open the platform</p>
+              <p className="text-blue-300/60 text-xs text-center font-mono">{APP_URL}</p>
             </div>
           </div>
-          <p className="text-blue-200 text-base leading-relaxed max-w-2xl">
-            An integrated AI platform purpose-built for Minoan Lines — automating passenger communications, compliance reporting, IT operations, demand forecasting, and operational workflows across seven interconnected modules.
-          </p>
-          <div className="flex flex-wrap gap-3 mt-6">
-            {[
-              { icon: Globe, label: '20 Languages' },
-              { icon: Zap, label: '7 Live Modules' },
-              { icon: Mail, label: 'Automated Reports' },
-              { icon: Activity, label: 'Live Monitoring' },
-              { icon: Calendar, label: 'Ready for Integration' },
-            ].map(({ icon: Icon, label }) => (
-              <div key={label} className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg text-sm text-white">
-                <Icon className="w-3.5 h-3.5 text-[#C9A84C]" />{label}
+        </div>
+      </section>
+
+      {/* What's Live */}
+      <section className="py-16">
+        <div className="max-w-5xl mx-auto px-6">
+          <SectionLabel>What&apos;s Live Today</SectionLabel>
+          <h2 className="text-3xl font-bold text-[#001A4D] mb-2">Six modules. Fully deployed.</h2>
+          <p className="text-gray-500 mb-10">Not a prototype. Not a demo environment. Production infrastructure on Vercel + Supabase, serving real data.</p>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {DELIVERED.map(({ icon: Icon, label, desc }) => (
+              <div key={label} className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-shadow">
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3"
+                  style={{ background: 'linear-gradient(135deg, #003087 0%, #0047CC 100%)' }}>
+                  <Icon className="w-5 h-5 text-white" />
+                </div>
+                <div className="font-semibold text-[#001A4D] text-sm mb-1">{label}</div>
+                <div className="text-gray-500 text-xs leading-relaxed">{desc}</div>
               </div>
             ))}
           </div>
         </div>
-        <div className="bg-[#003087] px-8 py-4 flex items-center justify-between flex-wrap gap-3">
-          <p className="text-blue-200 text-sm">Built and deployed on Vercel · Powered by IntegraMind AI</p>
-          <div className="flex gap-3">
-            <Link href="/dashboard" className="flex items-center gap-1.5 bg-white text-[#003087] px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-50 transition-colors">
-              <BarChart2 className="w-4 h-4" /> Live Dashboard
-            </Link>
-            <Link href="/book" className="flex items-center gap-1.5 bg-[#C9A84C] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-amber-600 transition-colors">
-              <Ticket className="w-4 h-4" /> Live Demo
-            </Link>
+      </section>
+
+      {/* Why Now */}
+      <section className="py-16 bg-[#001A4D]">
+        <div className="max-w-5xl mx-auto px-6">
+          <SectionLabel>Why Now</SectionLabel>
+          <h2 className="text-3xl font-bold text-white mb-8">The regulatory window is closing.</h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              { icon: FileText, title: 'EU ETS Phase 4', desc: '2024 maritime inclusion is live. Allowance costs are rising. Manual reporting is no longer viable at scale.', color: '#ef4444' },
+              { icon: Globe, title: 'FuelEU Maritime', desc: 'GHG intensity targets kick in January 2025. Every vessel in the EU fleet needs annual compliance reports.', color: '#C9A84C' },
+              { icon: TrendingUp, title: 'Cost of Delay', desc: 'Every month without automation is a month of manual reporting hours and missed optimisation savings.', color: '#22c55e' },
+            ].map(({ icon: Icon, title, desc, color }) => (
+              <div key={title} className="bg-white/5 border border-white/10 rounded-xl p-6">
+                <Icon className="w-6 h-6 mb-3" style={{ color }} />
+                <div className="font-semibold text-white mb-2">{title}</div>
+                <p className="text-blue-200 text-sm leading-relaxed">{desc}</p>
+              </div>
+            ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* The Problem */}
-      <div className="card p-8">
-        <h2 className="text-lg font-bold text-[#001A4D] dark:text-slate-100 mb-2">The Operational Challenge</h2>
-        <p className="text-sm text-gray-500 dark:text-slate-400 mb-5">Three systemic problems your teams face today — all addressable with this platform.</p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[
-            { title: 'Fragmented Operations', desc: 'Vessel tracking, compliance reporting, customer support, and ticketing live in separate systems with no unified view for management.' },
-            { title: 'Manual Reporting Burden', desc: 'EU ETS and FuelEU compliance reports require significant manual effort each period, creating risk of deadline misses and errors.' },
-            { title: 'Missed Revenue Signals', desc: 'Demand patterns across routes are not systematically analysed, leaving revenue optimisation opportunities unquantified and unactioned.' },
-          ].map(({ title, desc }) => (
-            <div key={title} className="bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 rounded-xl p-4">
-              <h3 className="font-semibold text-red-800 dark:text-red-300 text-sm mb-2">{title}</h3>
-              <p className="text-sm text-red-700 dark:text-red-400 leading-relaxed">{desc}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* IT-Specific Value */}
-      <div className="card p-8">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center flex-shrink-0">
-            <ShieldCheck className="w-5 h-5 text-[#C9A84C]" />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-[#001A4D] dark:text-slate-100">Value for IT — Administrator & Manager</h2>
-            <p className="text-sm text-gray-500 dark:text-slate-400">Your IT team currently runs on reactive firefighting. This platform shifts them to proactive management.</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-          {/* IT Administrator */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-2 h-2 rounded-full bg-orange-500" />
-              <h3 className="font-bold text-gray-900 dark:text-slate-100 text-sm uppercase tracking-wide">IT Administrator — Day to Day</h3>
-            </div>
-            <div className="bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-800/20 rounded-xl p-4 space-y-2">
-              <p className="text-xs font-semibold text-red-700 dark:text-red-400 uppercase tracking-wide mb-1">Today's Reality</p>
-              {[
-                { icon: Clock, text: 'Manual ticket intake, categorisation, and prioritisation for every request' },
-                { icon: AlertTriangle, text: 'No system-wide visibility — service failures discovered only when users complain' },
-                { icon: Users, text: 'Morning manual checks across every system before work begins' },
-                { icon: FileText, text: 'Writing status reports for management from scratch each week' },
-              ].map(({ icon: Icon, text }) => (
-                <div key={text} className="flex items-start gap-2">
-                  <Icon className="w-3.5 h-3.5 text-red-400 mt-0.5 flex-shrink-0" />
-                  <p className="text-xs text-red-700 dark:text-red-400 leading-relaxed">{text}</p>
-                </div>
-              ))}
-            </div>
-            <div className="bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-800/20 rounded-xl p-4 space-y-2">
-              <p className="text-xs font-semibold text-green-700 dark:text-green-400 uppercase tracking-wide mb-1">With This Platform</p>
-              {[
-                { icon: CheckCircle, text: 'Zero-touch ticket triage — AI classifies, prioritises, and suggests resolutions instantly' },
-                { icon: CheckCircle, text: 'Infrastructure monitoring refreshes every 30 seconds across all 7 services' },
-                { icon: CheckCircle, text: 'Alert emails fire automatically before users are affected' },
-                { icon: CheckCircle, text: 'Full audit log records every event — answer any management question in seconds' },
-              ].map(({ icon: Icon, text }) => (
-                <div key={text} className="flex items-start gap-2">
-                  <Icon className="w-3.5 h-3.5 text-green-500 mt-0.5 flex-shrink-0" />
-                  <p className="text-xs text-green-700 dark:text-green-400 leading-relaxed">{text}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* IT Manager */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-2 h-2 rounded-full bg-blue-500" />
-              <h3 className="font-bold text-gray-900 dark:text-slate-100 text-sm uppercase tracking-wide">IT Manager — Accountability Upward</h3>
-            </div>
-            <div className="bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-800/20 rounded-xl p-4 space-y-2">
-              <p className="text-xs font-semibold text-red-700 dark:text-red-400 uppercase tracking-wide mb-1">Today's Reality</p>
-              {[
-                { icon: Clock, text: 'Reporting to executives and Grimaldi Group requires significant manual compilation effort' },
-                { icon: AlertTriangle, text: 'No single view of fleet ops, IT health, and compliance in one place' },
-                { icon: TrendingUp, text: 'Hard to justify IT headcount or budget without quantified performance data' },
-                { icon: Users, text: 'IT team\'s value is invisible to leadership — effort is not measured or reported' },
-              ].map(({ icon: Icon, text }) => (
-                <div key={text} className="flex items-start gap-2">
-                  <Icon className="w-3.5 h-3.5 text-red-400 mt-0.5 flex-shrink-0" />
-                  <p className="text-xs text-red-700 dark:text-red-400 leading-relaxed">{text}</p>
-                </div>
-              ))}
-            </div>
-            <div className="bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-800/20 rounded-xl p-4 space-y-2">
-              <p className="text-xs font-semibold text-green-700 dark:text-green-400 uppercase tracking-wide mb-1">With This Platform</p>
-              {[
-                { icon: CheckCircle, text: 'Executive dashboard opens in any meeting — live KPIs, fleet, compliance, and IT health in 10 seconds' },
-                { icon: CheckCircle, text: 'Weekly reports email automatically to management and Grimaldi Group — no manual effort' },
-                { icon: CheckCircle, text: 'ETS cost in EUR, delay risk %, SLA breach counts — hard numbers for every budget conversation' },
-                { icon: CheckCircle, text: 'A platform Minoan Lines owns — not a vendor SaaS licence. Demonstrable to Grimaldi Group as internal capability' },
-              ].map(({ icon: Icon, text }) => (
-                <div key={text} className="flex items-start gap-2">
-                  <Icon className="w-3.5 h-3.5 text-green-500 mt-0.5 flex-shrink-0" />
-                  <p className="text-xs text-green-700 dark:text-green-400 leading-relaxed">{text}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* IT Stats Strip */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
-          {[
-            { value: '7', label: 'Services monitored live', color: 'text-blue-600' },
-            { value: '5', label: 'Automated alert rules', color: 'text-orange-600' },
-            { value: '30s', label: 'Health refresh interval', color: 'text-green-600' },
-            { value: '100%', label: 'Ticket resolutions logged', color: 'text-purple-600' },
-          ].map(({ value, label, color }) => (
-            <div key={label} className="bg-gray-50 dark:bg-slate-800 rounded-xl p-3 text-center">
-              <div className={`text-2xl font-bold ${color}`}>{value}</div>
-              <div className="text-xs text-gray-500 dark:text-slate-400 mt-0.5 leading-tight">{label}</div>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-5 flex gap-3">
-          <Link href="/health" className="flex items-center gap-1.5 bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-slate-700 transition-colors">
-            <Activity className="w-4 h-4" /> View Infrastructure Monitor
-          </Link>
-          <Link href="/helpdesk" className="flex items-center gap-1.5 btn-secondary text-sm">
-            <Headphones className="w-4 h-4" /> View IT Helpdesk
-          </Link>
-        </div>
-      </div>
-
-      {/* Modules */}
-      <div>
-        <h2 className="text-lg font-bold text-[#001A4D] dark:text-slate-100 mb-4">Platform Modules — All Live</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {modules.map(({ icon: Icon, title, subtitle, color, impact, metrics, value, href }) => (
-            <div key={title} className="card p-5 space-y-3">
-              <div className="flex items-start gap-3">
-                <div className={`w-10 h-10 rounded-xl ${color} flex items-center justify-center flex-shrink-0`}>
+      {/* Grimaldi Group Angle */}
+      <section id="grimaldi" className="py-16">
+        <div className="max-w-5xl mx-auto px-6">
+          <SectionLabel>The Bigger Picture</SectionLabel>
+          <h2 className="text-3xl font-bold text-[#001A4D] mb-4">
+            Not a Minoan Lines expense.<br />
+            <span style={{ color: '#003087' }}>A Grimaldi Group asset.</span>
+          </h2>
+          <p className="text-gray-600 leading-relaxed mb-8 max-w-2xl">
+            Minoan Lines is a Grimaldi Group company. What is being built here is not a cost centre for one subsidiary — it is the intelligence infrastructure that can run across the Group&apos;s entire fleet of 100+ vessels, with a single consolidation layer feeding executive reporting at Group HQ.
+          </p>
+          <div className="grid md:grid-cols-2 gap-6">
+            {[
+              { icon: Layers, title: 'Minoan Lines → Proof of Concept', desc: 'Four weeks to demonstrate ROI. One compliance report that would otherwise take days. That is the conversation to bring to Naples.' },
+              { icon: Users, title: 'Group Rollout → Multiplied Value', desc: 'The platform architecture is fleet-agnostic. Adding a Grimaldi vessel is configuration, not development. The cost per vessel drops by 80% at group scale.' },
+              { icon: Target, title: 'Consolidated Reporting', desc: 'Group compliance officers receive a single consolidated dashboard across all subsidiaries. Automated. Audit-ready. No manual aggregation.' },
+              { icon: Star, title: 'Competitive Intelligence', desc: 'AI-driven route and fuel optimisation generates data insights that give Grimaldi Group a measurable edge on the routes that matter most.' },
+            ].map(({ icon: Icon, title, desc }) => (
+              <div key={title} className="flex gap-4 bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ background: 'linear-gradient(135deg, #C9A84C 0%, #e8c56d 100%)' }}>
                   <Icon className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-slate-100">{title}</h3>
-                  <p className="text-xs text-gray-500 dark:text-slate-400">{subtitle}</p>
-                </div>
-                <Link href={href} className="ml-auto flex items-center gap-1 text-xs text-[#003087] dark:text-blue-400 hover:underline flex-shrink-0">
-                  Open <ArrowRight className="w-3 h-3" />
-                </Link>
-              </div>
-              <p className="text-sm text-gray-700 dark:text-slate-300 font-medium">{impact}</p>
-              <div className="grid grid-cols-2 gap-1">
-                {metrics.map(m => (
-                  <div key={m} className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-slate-400">
-                    <CheckCircle className="w-3 h-3 text-green-500 flex-shrink-0" />{m}
-                  </div>
-                ))}
-              </div>
-              <div className="bg-blue-50 dark:bg-blue-900/10 rounded-lg px-3 py-2 text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
-                {value}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Integration Roadmap */}
-      <div className="card p-8">
-        <h2 className="text-lg font-bold text-[#001A4D] dark:text-slate-100 mb-6">Integration Roadmap</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {roadmap.map(({ phase, label, items }, i) => (
-            <div key={phase} className="relative">
-              {i < roadmap.length - 1 && (
-                <div className="hidden md:block absolute top-5 left-full w-full h-0.5 bg-gradient-to-r from-gray-200 to-transparent dark:from-slate-700 z-0 -translate-y-0.5" />
-              )}
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-3 font-bold text-sm ${i === 0 ? 'bg-green-500 text-white' : 'bg-gray-200 dark:bg-slate-700 text-gray-600 dark:text-slate-300'}`}>
-                {i === 0 ? <CheckCircle className="w-5 h-5" /> : i + 1}
-              </div>
-              <div className="font-bold text-gray-900 dark:text-slate-100 text-sm">{phase}</div>
-              <div className={`text-xs font-semibold mb-2 ${i === 0 ? 'text-green-600' : 'text-gray-400 dark:text-slate-500'}`}>{label}</div>
-              <ul className="space-y-1.5">
-                {items.map(item => (
-                  <li key={item} className="flex items-start gap-1.5 text-xs text-gray-600 dark:text-slate-400">
-                    <span className={`w-1.5 h-1.5 rounded-full mt-1 flex-shrink-0 ${i === 0 ? 'bg-green-500' : 'bg-gray-300 dark:bg-slate-600'}`} />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ROI Section */}
-      <div className="card p-8 bg-gradient-to-br from-[#001A4D] to-[#003087] text-white">
-        <h2 className="text-lg font-bold mb-6">Quantified Business Value</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {[
-            { value: '80%', label: 'Customer queries handled by AI without human escalation' },
-            { value: 'Zero', label: 'Manual effort required to generate a compliance report' },
-            { value: '30s', label: 'Infrastructure health refresh — issues caught before users notice' },
-            { value: '100%', label: 'IT tickets auto-triaged, classified, and logged from submission' },
-          ].map(({ value, label }) => (
-            <div key={label} className="text-center">
-              <div className="text-3xl font-bold text-[#C9A84C]">{value}</div>
-              <div className="text-xs text-blue-200 mt-1 leading-relaxed">{label}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Grimaldi Group Expansion */}
-      <div className="card overflow-hidden">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-[#001A4D] via-[#003087] to-[#001A4D] px-8 py-7">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-[#C9A84C]/20 border border-[#C9A84C]/40 flex items-center justify-center">
-              <Globe className="w-5 h-5 text-[#C9A84C]" />
-            </div>
-            <div>
-              <div className="text-[#C9A84C] text-xs font-bold uppercase tracking-widest">Strategic Vision</div>
-              <h2 className="text-white text-xl font-bold">From Minoan Lines to the Grimaldi Group</h2>
-            </div>
-          </div>
-          <p className="text-blue-200 text-sm leading-relaxed max-w-3xl">
-            Minoan Lines is the proof of concept. Once the platform is embedded and delivering measurable results here,
-            the same architecture — AI customer agents, compliance automation, fleet intelligence, and IT operations —
-            rolls out across every Grimaldi Group company without starting from zero.
-          </p>
-        </div>
-
-        <div className="p-8 space-y-8">
-
-          {/* Step progression */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[
-              {
-                step: '01',
-                company: 'Minoan Lines',
-                label: 'Now — Live',
-                labelColor: 'text-green-600 bg-green-50 dark:bg-green-900/20',
-                dotColor: 'bg-green-500',
-                desc: 'Full platform deployed. 7 modules live. AI helpdesk, compliance automation, vessel ops, and booking running in production.',
-                routes: 'Piraeus · Heraklion · Chania',
-                vessels: '8 vessels',
-                icon: Anchor,
-                border: 'border-green-200 dark:border-green-800/40',
-                bg: 'bg-green-50/50 dark:bg-green-900/10',
-              },
-              {
-                step: '02',
-                company: 'Grimaldi Lines',
-                label: 'Phase 2 — 3–6 months',
-                labelColor: 'text-amber-600 bg-amber-50 dark:bg-amber-900/20',
-                dotColor: 'bg-amber-400',
-                desc: 'Italy–Mediterranean ro-ro and passenger ferry operations. Compliance, IT helpdesk, and booking workflows adapted and deployed.',
-                routes: 'Italy · Spain · Tunisia · Greece',
-                vessels: '30+ vessels',
-                icon: Ship,
-                border: 'border-amber-200 dark:border-amber-800/40',
-                bg: 'bg-amber-50/50 dark:bg-amber-900/10',
-              },
-              {
-                step: '03',
-                company: 'Full Grimaldi Group',
-                label: 'Phase 3 — 6–18 months',
-                labelColor: 'text-blue-600 bg-blue-50 dark:bg-blue-900/20',
-                dotColor: 'bg-blue-500',
-                desc: 'Finnlines, ACL, and all subsidiaries on one unified platform. Group-level executive reporting. Single AI layer across the entire fleet.',
-                routes: 'Baltic · Atlantic · Mediterranean · West Africa',
-                vessels: '130+ vessels',
-                icon: Globe,
-                border: 'border-blue-200 dark:border-blue-800/40',
-                bg: 'bg-blue-50/50 dark:bg-blue-900/10',
-              },
-            ].map(({ step, company, label, labelColor, dotColor, desc, routes, vessels, icon: Icon, border, bg }) => (
-              <div key={step} className={`rounded-xl border ${border} ${bg} p-5 space-y-3`}>
-                <div className="flex items-start justify-between">
-                  <div className="text-3xl font-black text-gray-100 dark:text-slate-700">{step}</div>
-                  <span className={`text-[10px] font-bold px-2 py-1 rounded-full flex items-center gap-1 ${labelColor}`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />{label}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Icon className="w-5 h-5 text-[#001A4D] dark:text-blue-300" />
-                  <h3 className="font-bold text-gray-900 dark:text-slate-100">{company}</h3>
-                </div>
-                <p className="text-xs text-gray-600 dark:text-slate-400 leading-relaxed">{desc}</p>
-                <div className="pt-2 border-t border-gray-100 dark:border-slate-700 space-y-1">
-                  <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
-                    <MapPin className="w-3 h-3 flex-shrink-0" />{routes}
-                  </div>
-                  <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
-                    <Ship className="w-3 h-3 flex-shrink-0" />{vessels}
-                  </div>
+                  <div className="font-semibold text-[#001A4D] mb-1">{title}</div>
+                  <p className="text-gray-500 text-sm leading-relaxed">{desc}</p>
                 </div>
               </div>
             ))}
           </div>
+        </div>
+      </section>
 
-          {/* Why this matters */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="font-bold text-[#001A4D] dark:text-slate-100 mb-3 flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-[#C9A84C]" />
-                Why start with Minoan Lines
-              </h3>
-              <div className="space-y-2">
-                {[
-                  'Smaller fleet and defined routes create a controlled, measurable pilot environment',
-                  'Strong EU regulatory exposure — ETS and FuelEU — creates immediate, quantifiable compliance ROI',
-                  'Direct relationship with Grimaldi Group leadership means results are visible at group level',
-                  'Proving value here builds the internal business case for group-wide rollout with no external sales pressure',
-                ].map(point => (
-                  <div key={point} className="flex items-start gap-2">
-                    <CheckCircle className="w-3.5 h-3.5 text-green-500 mt-0.5 flex-shrink-0" />
-                    <p className="text-sm text-gray-600 dark:text-slate-400 leading-relaxed">{point}</p>
+      {/* Roadmap */}
+      <section id="roadmap" className="py-16 bg-gray-50">
+        <div className="max-w-5xl mx-auto px-6">
+          <SectionLabel>Roadmap</SectionLabel>
+          <h2 className="text-3xl font-bold text-[#001A4D] mb-8">Four phases. One platform.</h2>
+          <div className="space-y-3">
+            {PHASES.map((p, i) => (
+              <div key={p.phase} className={`rounded-xl border ${p.border} ${p.bg} overflow-hidden`}>
+                <button className="w-full flex items-center justify-between px-5 py-4 text-left"
+                  onClick={() => setOpenPhase(openPhase === i ? null : i)}>
+                  <div className="flex items-center gap-3">
+                    <span className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
+                      style={{ background: p.color }}>
+                      {p.phase}
+                    </span>
+                    <div>
+                      <div className="font-semibold text-[#001A4D] text-sm">Phase {p.phase}: {p.label}</div>
+                      <div className="text-xs text-gray-500 flex items-center gap-1.5 mt-0.5">
+                        <Clock className="w-3 h-3" /> {p.period}
+                        {p.status === 'live' && (
+                          <span className="inline-flex items-center gap-1 bg-green-100 text-green-700 rounded-full px-2 py-0.5 text-xs font-medium ml-1">
+                            <CheckCircle className="w-3 h-3" /> Live
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                ))}
-              </div>
-            </div>
-            <div>
-              <h3 className="font-bold text-[#001A4D] dark:text-slate-100 mb-3 flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-[#C9A84C]" />
-                What scales without rebuilding
-              </h3>
-              <div className="space-y-2">
-                {[
-                  'Every module is configurable per company — routes, languages, compliance rules, and alert thresholds',
-                  'The AI customer agent already speaks 20 languages covering every Grimaldi Group market',
-                  'Compliance engine adapts to any EU ETS or FuelEU reporting scope — vessel count is just configuration',
-                  'Infrastructure monitoring and IT helpdesk deploy identically — no custom development per subsidiary',
-                ].map(point => (
-                  <div key={point} className="flex items-start gap-2">
-                    <CheckCircle className="w-3.5 h-3.5 text-blue-500 mt-0.5 flex-shrink-0" />
-                    <p className="text-sm text-gray-600 dark:text-slate-400 leading-relaxed">{point}</p>
+                  {openPhase === i ? <ChevronDown className="w-4 h-4 text-gray-400" /> : <ChevronRight className="w-4 h-4 text-gray-400" />}
+                </button>
+                {openPhase === i && (
+                  <div className="px-5 pb-4 border-t border-gray-200/60">
+                    <ul className="mt-3 space-y-2">
+                      {p.items.map(item => (
+                        <li key={item} className="flex items-start gap-2 text-sm text-gray-700">
+                          <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: p.color }} />
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                ))}
+                )}
               </div>
-            </div>
+            ))}
           </div>
+        </div>
+      </section>
 
-          {/* Group scale numbers */}
-          <div className="bg-gradient-to-r from-[#001A4D] to-[#003087] rounded-xl p-6">
-            <p className="text-[#C9A84C] text-xs font-bold uppercase tracking-widest mb-4">Grimaldi Group — Full Scale Opportunity</p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {/* Security */}
+      <section className="py-16">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="bg-[#001A4D] rounded-2xl p-8 md:p-10">
+            <SectionLabel>Security &amp; Compliance</SectionLabel>
+            <h2 className="text-2xl font-bold text-white mb-6">Built for EU-regulated maritime operations.</h2>
+            <div className="grid md:grid-cols-4 gap-4">
               {[
-                { value: '130+', label: 'Vessels across all subsidiaries' },
-                { value: '20+', label: 'Countries and markets served' },
-                { value: '6', label: 'Major subsidiary companies' },
-                { value: '1', label: 'Unified AI platform to run it all' },
-              ].map(({ value, label }) => (
-                <div key={label} className="text-center">
-                  <div className="text-2xl font-black text-[#C9A84C]">{value}</div>
-                  <div className="text-xs text-blue-200 mt-1 leading-tight">{label}</div>
+                { icon: Lock, label: 'EU-Hosted Infrastructure', desc: 'All data on Supabase EU region (Frankfurt). GDPR compliant by architecture.' },
+                { icon: Shield, label: 'No PII Exposure', desc: 'AI processes operational and compliance data only. Passenger PII never leaves your systems.' },
+                { icon: Brain, label: 'AI Model Isolation', desc: 'DeepSeek API processes anonymised operational prompts. No training on your data.' },
+                { icon: MapPin, label: 'Audit Trail', desc: 'Every action logged with timestamp, user, and metadata. Exportable for regulators.' },
+              ].map(({ icon: Icon, label, desc }) => (
+                <div key={label} className="bg-white/5 border border-white/10 rounded-xl p-4">
+                  <Icon className="w-5 h-5 text-[#C9A84C] mb-2" />
+                  <div className="text-white font-semibold text-sm mb-1">{label}</div>
+                  <p className="text-blue-200 text-xs leading-relaxed">{desc}</p>
                 </div>
               ))}
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Next Steps */}
-      <div className="card p-8 border-2 border-[#C9A84C]/30">
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-xl bg-[#C9A84C]/15 flex items-center justify-center flex-shrink-0">
-            <ArrowRight className="w-6 h-6 text-[#C9A84C]" />
+      {/* Investment & Offer */}
+      <section id="offer" className="py-16 bg-gray-50">
+        <div className="max-w-5xl mx-auto px-6">
+          <SectionLabel>Investment &amp; Offer</SectionLabel>
+          <h2 className="text-3xl font-bold text-[#001A4D] mb-2">Clear pricing. Immediate value.</h2>
+          <p className="text-gray-500 mb-10">Start with the pilot. There is no commitment beyond four weeks.</p>
+          <div className="grid md:grid-cols-3 gap-5 mb-10">
+            {COSTS.map(c => (
+              <div key={c.label}
+                className={`rounded-2xl p-6 border-2 transition-shadow ${c.highlight
+                  ? 'border-[#003087] bg-white shadow-xl shadow-blue-900/10'
+                  : 'border-gray-200 bg-white shadow-sm'}`}>
+                {c.highlight && (
+                  <div className="inline-flex items-center gap-1 bg-[#003087] text-white text-xs font-semibold px-3 py-1 rounded-full mb-3">
+                    <Star className="w-3 h-3" /> Recommended
+                  </div>
+                )}
+                <div className="text-2xl font-bold text-[#001A4D] mb-1">{c.price}</div>
+                <div className="font-semibold text-gray-900 mb-2">{c.label}</div>
+                <p className="text-gray-500 text-sm leading-relaxed">{c.note}</p>
+              </div>
+            ))}
           </div>
-          <div>
-            <h2 className="text-lg font-bold text-[#001A4D] dark:text-slate-100 mb-2">Proposed Next Steps</h2>
-            <div className="space-y-2 text-sm text-gray-700 dark:text-slate-300 leading-relaxed">
-              <p>The platform is fully deployed and operational. All seven modules are live and demonstrable in a browser, on any device, right now.</p>
-              <p>The immediate next step is a technical integration session to connect the platform to Minoan Lines' existing systems — the reservation database, live AIS feed, and Grimaldi Group reporting portal. This is the work that turns the pilot into a production-grade system.</p>
-              <p>Once Minoan Lines is fully integrated and the results are quantified, the same platform — with no architectural changes — expands to Grimaldi Lines, Finnlines, ACL, and the remaining subsidiaries. The group-level business case builds itself.</p>
-            </div>
-            <div className="flex flex-wrap gap-3 mt-5">
-              <Link href="/dashboard" className="btn-primary flex items-center gap-2 text-sm">
-                <BarChart2 className="w-4 h-4" /> View Live Dashboard
-              </Link>
-              <Link href="/health" className="flex items-center gap-2 bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-slate-700 transition-colors">
-                <Activity className="w-4 h-4" /> Infrastructure Monitor
-              </Link>
-              <Link href="/chat" className="btn-secondary flex items-center gap-2 text-sm">
-                <MessageCircle className="w-4 h-4" /> Talk to Sofia
-              </Link>
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 flex gap-4 items-start">
+            <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <div className="font-semibold text-amber-900 mb-1">ROI Reference Point</div>
+              <p className="text-amber-800 text-sm leading-relaxed">
+                A single EU ETS compliance report prepared manually by a maritime compliance consultant costs €1,500–€3,000 per vessel per quarter. The platform generates the same report in under 60 seconds, for all 8 vessels simultaneously, in any of 20 languages. The pilot pays for itself on the first report run.
+              </p>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
+      {/* Q&A */}
+      <section id="qa" className="py-16">
+        <div className="max-w-5xl mx-auto px-6">
+          <SectionLabel>Questions &amp; Objections</SectionLabel>
+          <h2 className="text-3xl font-bold text-[#001A4D] mb-8">Every concern, answered directly.</h2>
+          <div className="space-y-3">
+            {QA.map((item, i) => (
+              <div key={i} className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                <button className="w-full flex items-center justify-between px-5 py-4 text-left gap-4"
+                  onClick={() => setOpenQA(openQA === i ? null : i)}>
+                  <span className="font-medium text-gray-900 text-sm">{item.q}</span>
+                  {openQA === i ? <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" /> : <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />}
+                </button>
+                {openQA === i && (
+                  <div className="px-5 pb-4 border-t border-gray-100">
+                    <p className="mt-3 text-sm text-gray-700 leading-relaxed"
+                      style={{ borderLeft: '3px solid #C9A84C', paddingLeft: '12px' }}>
+                      {item.a}
+                    </p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* The Close */}
+      <section style={{ background: 'linear-gradient(135deg, #001A4D 0%, #003087 100%)' }}>
+        <div className="max-w-5xl mx-auto px-6 py-20">
+          <div className="text-center mb-10">
+            <SectionLabel>The Close</SectionLabel>
+            <h2 className="text-4xl font-bold text-white mb-4">
+              One decision. Four weeks.<br />
+              <span style={{ color: '#C9A84C' }}>Then you own the results.</span>
+            </h2>
+          </div>
+          <div className="max-w-3xl mx-auto bg-white/5 border border-white/10 rounded-2xl p-8 mb-10">
+            <p className="text-blue-100 text-base leading-loose mb-6">
+              You have seen the platform running. You have seen the compliance reports it generates. You have seen the AI answering passenger questions at 3am in Greek, Italian, and German simultaneously.
+            </p>
+            <p className="text-blue-100 text-base leading-loose mb-6">
+              The question is not whether this works. It is already working.
+            </p>
+            <p className="text-blue-100 text-base leading-loose mb-6">
+              The question is whether Minoan Lines — and through you, Grimaldi Group — wants to be the first in your sector to have this intelligence layer running at scale, or whether you want to be in the position of catching up to whoever moves first.
+            </p>
+            <p className="text-white font-semibold text-base leading-loose">
+              I am proposing a four-week compliance pilot at €4,900. No IT involvement from your side. No procurement risk. If at the end of four weeks you have not seen clear value, we part ways and you keep every report that was generated.
+            </p>
+            <p className="font-bold text-lg mt-6" style={{ color: '#C9A84C' }}>
+              All I need from you today is a yes to start the clock.
+            </p>
+          </div>
+
+          {/* Final QR */}
+          <div className="flex flex-col items-center gap-4">
+            <div className="bg-white rounded-2xl p-4 shadow-2xl">
+              <QRCodeSVG value={APP_URL} size={120} fgColor="#001A4D" bgColor="#ffffff" />
+            </div>
+            <p className="text-blue-200 text-sm text-center">Scan to explore the live platform right now</p>
+            <a href={APP_URL} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all hover:scale-105"
+              style={{ background: '#C9A84C', color: '#001A4D' }}>
+              <Zap className="w-4 h-4" /> Open Live Platform
+            </a>
+            <p className="text-blue-300/60 text-xs font-mono mt-1">{APP_URL}</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <div className="bg-[#000d2b] px-6 py-6 text-center">
+        <p className="text-blue-300/60 text-xs">
+          IntegraMindAI · Built for Minoan Lines S.A. · Grimaldi Group · {new Date().getFullYear()}
+        </p>
+      </div>
     </div>
   );
 }
