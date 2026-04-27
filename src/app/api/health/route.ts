@@ -31,7 +31,7 @@ async function checkSupabase() {
   }
 }
 
-async function checkDeepSeek() {
+async function checkAIEngine() {
   const start = Date.now();
   try {
     const res = await fetch('https://api.deepseek.com/v1/models', {
@@ -39,9 +39,9 @@ async function checkDeepSeek() {
       signal: AbortSignal.timeout(5000),
     });
     const ms = Date.now() - start;
-    return { name: 'DeepSeek AI API', status: res.ok ? 'healthy' : 'degraded', ms, http: res.status };
+    return { name: 'AI Engine', status: res.ok ? 'healthy' : 'degraded', ms, http: res.status };
   } catch (e) {
-    return { name: 'DeepSeek AI API', status: 'down' as const, ms: Date.now() - start, error: e instanceof Error ? e.message : 'unreachable' };
+    return { name: 'AI Engine', status: 'down' as const, ms: Date.now() - start, error: e instanceof Error ? e.message : 'unreachable' };
   }
 }
 
@@ -71,7 +71,7 @@ export async function GET() {
     probe('Analytics API', `${BASE}/api/analytics`),
     probe('Helpdesk API', `${BASE}/api/helpdesk`),
     checkSupabase(),
-    checkDeepSeek(),
+    checkAIEngine(),
     checkResend(),
   ]);
 

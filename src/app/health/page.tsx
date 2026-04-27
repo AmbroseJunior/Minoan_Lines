@@ -21,7 +21,7 @@ const MODULE_ICONS: Record<string, React.ElementType> = {
 
 const SERVICE_ICONS: Record<string, React.ElementType> = {
   'Supabase Database': Database,
-  'DeepSeek AI API': Cpu,
+  'AI Engine': Cpu,
   'Resend Email': Mail,
 };
 

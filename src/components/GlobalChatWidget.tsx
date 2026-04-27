@@ -13,13 +13,17 @@ const SUGGESTIONS = [
   'Port arrival time?',
 ];
 
+const INITIAL: Msg[] = [
+  { role: 'assistant', content: "Hello! I'm the Minoan Lines AI assistant. How can I help you today?", id: '0' },
+];
+
 export default function GlobalChatWidget() {
   const path = usePathname();
   const { user } = useAuth();
+
+  // ALL hooks must run before any conditional return
   const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState<Msg[]>([
-    { role: 'assistant', content: "Hello! I'm the Minoan Lines AI assistant. How can I help you today?", id: '0' },
-  ]);
+  const [messages, setMessages] = useState<Msg[]>(INITIAL);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -27,11 +31,12 @@ export default function GlobalChatWidget() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Hide on chat page and embed routes
-  if (!user || path?.startsWith('/chat') || path?.startsWith('/embed')) return null;
+  useEffect(() => {
+    if (open) bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, open]);
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
+  const hidden = !user || path?.startsWith('/chat') || path?.startsWith('/embed');
+  if (hidden) return null;
 
   async function send(text?: string) {
     const msg = (text ?? input).trim();
@@ -120,7 +125,7 @@ export default function GlobalChatWidget() {
                 <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#001A4D]" />
               </div>
               <div>
-                <div className="text-white font-semibold text-sm leading-tight tracking-wide">Minoan Lines</div>
+                <div className="text-white font-semibold text-sm leading-tight tracking-wide">Sofia · Minoan Lines</div>
                 <div className="text-blue-300 text-xs tracking-wide">AI Assistant · 24/7 Online</div>
               </div>
             </div>
@@ -202,7 +207,7 @@ export default function GlobalChatWidget() {
                 <input
                   ref={inputRef}
                   value={input} onChange={e => setInput(e.target.value)}
-                  placeholder="Type your message..."
+                  placeholder="Ask Sofia anything..."
                   className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 pr-14 focus:outline-none focus:ring-2 focus:ring-[#003087]/40 bg-gray-50 hover:bg-white transition-colors"
                 />
                 {input && (
@@ -249,7 +254,7 @@ export default function GlobalChatWidget() {
           </span>
         )}
         {!open && (
-          <span className="absolute inset-0 rounded-full animate-ping opacity-20"
+          <span className="absolute inset-0 rounded-full animate-ping opacity-20 pointer-events-none"
             style={{ background: '#003087' }} />
         )}
       </button>

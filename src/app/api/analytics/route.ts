@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { deepseek, DEEPSEEK_MODEL } from '@/lib/ai';
 
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 const ROUTES = [
   'Piraeus-Heraklion', 'Piraeus-Chania', 'Heraklion-Piraeus', 'Chania-Piraeus',
