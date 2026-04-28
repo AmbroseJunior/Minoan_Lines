@@ -3,7 +3,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
-import { Ship, MessageCircle, FileText, Headphones, BarChart2, Sun, Moon, Ticket, LayoutDashboard, Activity, LogOut, Menu, X, Shield, Presentation, Euro } from 'lucide-react';
+import { Ship, MessageCircle, FileText, Headphones, BarChart2, Sun, Moon, Ticket, LayoutDashboard, Activity, LogOut, Menu, X, Shield, Presentation } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
 import { useTheme } from './ThemeProvider';
@@ -27,6 +27,7 @@ export default function Nav() {
     { href: '/health', label: 'Health', icon: Activity },
     { href: '/audit', label: 'Audit', icon: Shield },
     { href: '/demo', label: 'Pitch', icon: Presentation },
+    { href: '/pricing', label: 'Pricing', icon: Ticket },
   ];
 
   const linkClass = (href: string) =>

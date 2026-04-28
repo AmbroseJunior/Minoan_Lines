@@ -16,6 +16,7 @@ type Vessel = {
   lat: number; lon: number; delay_probability: number;
   departure_time: string; arrival_time: string; eta_label: string; eta_hours: number | null;
   fuel_consumption_tons: number; last_updated: string; heading: number;
+  ais_live?: boolean;
 };
 
 function riskColor(p: number) {
@@ -52,6 +53,7 @@ export default function VesselsPage() {
 
   const underway = vessels.filter(v => v.status === 'underway').length;
   const highRisk = vessels.filter(v => v.delay_probability > 0.7).length;
+  const aisLive  = vessels.filter(v => v.ais_live).length;
 
   const scrollToCard = (name: string) => {
     setSelected(name);
@@ -81,11 +83,12 @@ export default function VesselsPage() {
       </div>
 
       {/* Fleet summary strip */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-4 gap-3">
         {[
           { label: 'Fleet Size', value: vessels.length, icon: Ship, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/20' },
           { label: 'Underway', value: underway, icon: Navigation, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-900/20' },
           { label: 'High Delay Risk', value: highRisk, icon: AlertTriangle, color: highRisk > 0 ? 'text-red-600' : 'text-gray-400', bg: highRisk > 0 ? 'bg-red-50 dark:bg-red-900/20' : 'bg-gray-50 dark:bg-slate-800' },
+          { label: 'AIS Live Feed', value: aisLive, icon: Navigation, color: aisLive > 0 ? 'text-emerald-600' : 'text-gray-400', bg: aisLive > 0 ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-gray-50 dark:bg-slate-800' },
         ].map(({ label, value, icon: Icon, color, bg }) => (
           <div key={label} className="card p-3 flex items-center gap-3">
             <div className={clsx('w-8 h-8 rounded-lg flex items-center justify-center', bg)}>
@@ -141,9 +144,16 @@ export default function VesselsPage() {
                     <Anchor className="w-4 h-4 text-[#003087] dark:text-blue-400 flex-shrink-0" />
                     <span className="font-semibold text-sm text-gray-900 dark:text-slate-100">{v.name}</span>
                   </div>
-                  <span className={clsx('badge text-[10px]', statusBadge(v.status))}>
-                    {v.status.replace('_', ' ')}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    {v.ais_live && (
+                      <span className="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400 px-1.5 py-0.5 rounded-full">
+                        <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />AIS
+                      </span>
+                    )}
+                    <span className={clsx('badge text-[10px]', statusBadge(v.status))}>
+                      {v.status.replace('_', ' ')}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Route */}
