@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { deepseek, DEEPSEEK_MODEL } from '@/lib/ai';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -137,9 +136,4 @@ export async function DELETE(req: Request) {
   } catch (e) {
     return NextResponse.json({ error: e instanceof Error ? e.message : 'Failed to delete employee' }, { status: 500 });
   }
-}
-
-// Separate endpoint: GET /api/employees/departments
-export async function getDepartments(): Promise<string[]> {
-  return [...new Set(SEED.map(e => e.department))].sort();
 }
