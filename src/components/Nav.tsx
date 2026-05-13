@@ -3,7 +3,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
-import { Ship, MessageCircle, FileText, Headphones, BarChart2, Sun, Moon, Ticket, LayoutDashboard, Activity, LogOut, Menu, X, Shield, Presentation } from 'lucide-react';
+import { Ship, MessageCircle, FileText, Headphones, BarChart2, Sun, Moon, Ticket, LayoutDashboard, Activity, LogOut, Menu, X, Shield, Users, Wrench } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
 import { useTheme } from './ThemeProvider';
@@ -23,11 +23,11 @@ export default function Nav() {
     { href: '/compliance', label: t('nav.compliance'), icon: FileText },
     { href: '/helpdesk', label: t('nav.helpdesk'), icon: Headphones },
     { href: '/analytics', label: t('nav.analytics'), icon: BarChart2 },
+    { href: '/employees', label: 'Crew', icon: Users },
+    { href: '/maintenance', label: 'Maintenance', icon: Wrench },
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/health', label: 'Health', icon: Activity },
     { href: '/audit', label: 'Audit', icon: Shield },
-    { href: '/demo', label: 'Pitch', icon: Presentation },
-    { href: '/pricing', label: 'Pricing', icon: Ticket },
   ];
 
   const linkClass = (href: string) =>
