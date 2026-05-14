@@ -4,8 +4,9 @@
 Built by **IntegraMind AI** (integramindai.com) for **Minoan Lines S.A.**, Heraklion, Crete.
 
 > **Client contact:** Michalis Orfanoudakis, IT Department Manager
-> **Platform version:** 1.0.0
-> **AI model:** `claude-sonnet-4-20250514`
+> **Platform version:** 2.0.0
+> **Last deployed:** 2026-05-14
+> **AI model:** DeepSeek Chat (via OpenAI-compatible API)
 
 ---
 
@@ -13,173 +14,116 @@ Built by **IntegraMind AI** (integramindai.com) for **Minoan Lines S.A.**, Herak
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | Flutter 3 (web · Android · iOS) |
-| State management | Riverpod 2 |
-| Navigation | go_router |
-| Backend | FastAPI (Python 3.11) |
-| Database + Realtime | Supabase (PostgreSQL) |
-| AI | Anthropic Claude (`claude-sonnet-4-20250514`) |
-| Rate limiting | slowapi (3 tiers: 20 / 30 / 120 req/min) |
-| Frontend deploy | Vercel |
-| Backend deploy | Railway |
-| CI/CD | GitHub Actions |
+| Framework | Next.js 14 (App Router, TypeScript strict) |
+| Styling | Tailwind CSS + custom maritime design system |
+| i18n | react-i18next · 20 languages |
+| Auth | Supabase Auth (email/password) |
+| Database + Realtime | Supabase (PostgreSQL + WebSocket Realtime) |
+| AI | DeepSeek Chat via OpenAI SDK |
+| AIS | AISstream.io WebSocket (live vessel positions) |
+| Security | Next.js Middleware (rate limiting, OWASP headers, CSP) |
+| PWA | next-pwa (service worker, offline support) |
+| Deploy | Vercel (Hobby / Pro) |
 
 ---
 
-## Platform Modules
+## Platform Modules (11 total)
 
-| # | Module | Endpoint prefix | Description |
-|---|--------|----------------|-------------|
-| 1 | Vessel Ops Dashboard | `/vessels` | Live AIS tracking, delay prediction, NL fleet queries |
-| 2 | Customer Support Agent | `/chat` | Streaming Claude agent (Greek + English), auto-escalation |
-| 3 | Compliance & Reporting | `/reports`, `/compliance` | EU ETS, FuelEU Maritime, ISO 9001, ATHEX PDF reports |
-| 4 | IT Helpdesk Triage | `/tickets` | AI ticket classification, SLA tracking |
-| 5 | Analytics & Forecasting | `/analytics` | Prophet demand forecasting, NL revenue intelligence |
+| # | Module | Route | Description |
+|---|--------|-------|-------------|
+| 1 | Reserve a Ferry | `/book` | Online ticket booking — instant email confirmation |
+| 2 | Vessel Operations | `/vessels` | Real-time AIS tracking, delay prediction, fuel monitoring |
+| 3 | AI Customer Agent | `/chat` | Multi-language AI assistant (20 languages) |
+| 4 | EU Compliance | `/compliance` | EU ETS & FuelEU Maritime reports with AI narrative |
+| 5 | IT Helpdesk | `/helpdesk` | AI-triaged tickets, SLA tracking, escalation |
+| 6 | Analytics & Insights | `/analytics` | Demand forecasting, revenue intelligence |
+| 7 | Crew & Personnel | `/employees` | Seafarer records, STCW/medical expiry, leave management |
+| 8 | Fleet Maintenance | `/maintenance` | Work orders, PM schedules, parts inventory, fuel logs |
+| 9 | Operations Dashboard | `/dashboard` | Real-time KPIs across all operations |
+| 10 | System Health | `/health` | API, DB and service uptime monitoring |
+| 11 | Audit Log | `/audit` | Compliance trail for all system events |
+
+---
+
+## Security
+
+- **Rate limiting** — 100 req/min general API, 10 req/15min auth endpoints (in-memory; replace with Redis/@upstash for multi-instance)
+- **OWASP headers** — X-Frame-Options DENY, HSTS, X-Content-Type-Options, X-XSS-Protection, Referrer-Policy, Permissions-Policy
+- **Content Security Policy** — strict CSP via next.config.js
+- **Path traversal guard** — middleware rejects `../` and encoded variants
+- **Input validation** — `src/lib/validation.ts` sanitizes all API inputs (string, email, date, enum, int, float)
+- **Parameterized queries** — all DB access via Supabase ORM (no raw SQL)
+- **Authentication** — Supabase Auth (email/password with secure session management)
+
+---
+
+## i18n — 20 Languages
+
+Every word in the interface translates. Supported languages:
+
+English · Greek · Spanish · French · German · Italian · Portuguese · Arabic · Chinese · Japanese · Russian · Turkish · Dutch · Polish · Swedish · Korean · Hindi · Ukrainian · Romanian · Czech
+
+Language auto-detected from browser; persists in `localStorage`. Fallback: English.
+
+---
+
+## Realtime (WebSocket)
+
+- **AIS vessel positions** — `wss://stream.aisstream.io/v0/stream` (server-side, live positions)
+- **Supabase Realtime** — `src/lib/realtime.ts` provides `useTableSubscription()` hook for live updates on `work_orders`, `leave_requests`, `employees` tables
+- **SSE** — compliance and analytics streaming responses from AI
+
+---
+
+## Horizontal Scaling
+
+All API routes are stateless. Session state is stored in Supabase (not server memory). In-memory rate limiter in `src/middleware.ts` works per-instance — replace with `@upstash/ratelimit` + Redis for true horizontal scaling. Supabase connection pooling via pgBouncer is enabled by default on hosted projects.
 
 ---
 
 ## Quick Start (Local)
 
 ### Prerequisites
-- Python 3.11+
-- Flutter 3.24+
+- Node.js 18+
 - Supabase project (free tier works) — [supabase.com](https://supabase.com)
-- `ANTHROPIC_API_KEY` from [console.anthropic.com](https://console.anthropic.com)
+- DeepSeek API key — [platform.deepseek.com](https://platform.deepseek.com)
 
-### 1. Configure environment
+### 1. Install dependencies
 
 ```bash
 cd minoan-ai-platform
-cp .env.example .env
-# Edit .env — fill in ANTHROPIC_API_KEY, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
+npm install
 ```
 
-### 2. Set up Supabase schema
-
-In your Supabase project → SQL Editor → New query, paste and run:
-
-```
-backend/supabase/schema.sql
-```
-
-This creates all tables, indexes, RLS policies, and seeds the 8 Minoan vessels.
-
-### 3. Run the backend
+### 2. Configure environment
 
 ```bash
-cd backend
-pip install -r requirements.txt
-uvicorn main:app --reload --port 8000
+cp .env.example .env.local
+# Edit .env.local:
+# DEEPSEEK_API_KEY=sk-...
+# NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+# NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+# SUPABASE_SERVICE_ROLE_KEY=eyJ...
+# AISSTREAM_API_KEY=your-key (optional — mock data used if absent)
 ```
 
-### 4. Run the Flutter app
+### 3. Set up Supabase schema (optional)
+
+Run `supabase/employees-maintenance.sql` in your Supabase SQL editor. The platform works without this — all modules fall back to realistic seed data.
+
+### 4. Run development server
 
 ```bash
-cd app
-flutter pub get
-
-# Web (dev)
-flutter run -d chrome \
-  --dart-define=SUPABASE_URL=https://your-project.supabase.co \
-  --dart-define=API_BASE_URL=http://localhost:8000
-
-# Android / iOS
-flutter run \
-  --dart-define=SUPABASE_URL=https://your-project.supabase.co \
-  --dart-define=API_BASE_URL=https://your-api.railway.app
+npm run dev
 ```
 
-### 5. Verify
+Open [http://localhost:3000](http://localhost:3000). Sign in with any Supabase Auth user or create one at `/auth`.
+
+### 5. Build for production
 
 ```bash
-# Backend health
-curl http://localhost:8000/health
-
-# API docs
-open http://localhost:8000/docs
-```
-
----
-
-## API Reference
-
-### Module 1 — Vessel Ops
-
-```
-GET  /vessels                           All vessel live statuses + delay probability
-GET  /vessels/{name}/status             Single vessel (e.g. "Knossos Palace")
-GET  /vessels/{name}/delay-prediction   Delay model output
-POST /vessels/query                     NL fleet query {"question": "..."}
-POST /vessels/sync                      Manual AIS sync trigger
-```
-
-**NL fleet query example:**
-```bash
-curl -X POST http://localhost:8000/vessels/query \
-  -H "Content-Type: application/json" \
-  -d '{"question": "Which vessels are running more than 30 minutes late today?"}'
-```
-
-### Module 2 — Customer Support Agent
-
-```
-POST /chat                              Streaming SSE chat
-GET  /chat/{session_id}/history         Conversation history
-POST /chat/{session_id}/close           Mark resolved
-```
-
-**Streaming (Greek):**
-```bash
-curl -X POST http://localhost:8000/chat \
-  -H "Content-Type: application/json" \
-  -d '{"message": "Πότε φεύγει το επόμενο πλοίο για Ηράκλειο;"}' \
-  --no-buffer
-```
-
-### Module 3 — Compliance
-
-```
-POST /reports/generate                  Generate PDF report
-GET  /reports/{type}/latest             Latest report (eu_ets|fueleu|iso9001|athex_quarterly)
-GET  /reports/{id}/download             Download PDF
-POST /compliance/fuel-data              Ingest SCADA fuel record (idempotent)
-GET  /compliance/fuel-data              List fuel records
-```
-
-**Generate EU ETS report:**
-```bash
-curl -X POST http://localhost:8000/reports/generate \
-  -H "Content-Type: application/json" \
-  -d '{"report_type": "eu_ets", "report_period": "2025-Q1", "vessel_name": "Knossos Palace"}'
-```
-
-### Module 4 — Helpdesk
-
-```
-POST   /tickets                         Create + AI-triage ticket (201)
-GET    /tickets                         List (?status=open&priority=critical&category=Network/Connectivity)
-GET    /tickets/{id}                    Get ticket
-PATCH  /tickets/{id}                    Update status / resolution
-```
-
-**Submit ticket:**
-```bash
-curl -X POST http://localhost:8000/tickets \
-  -H "Content-Type: application/json" \
-  -d '{
-    "title": "VSAT on Knossos Palace losing connection every hour",
-    "description": "Satellite comms have been dropping for 24h. Affects crew internet and AIS reporting.",
-    "submitted_by": "Captain Papadopoulos"
-  }'
-```
-
-### Module 5 — Analytics
-
-```
-POST /analytics/forecast                Run passenger/revenue forecast
-GET  /analytics/performance-summary     NL summary via Claude (?query=...)
-POST /analytics/upload?route=...        Upload historical CSV (date,passengers columns)
-GET  /analytics/routes                  List available routes
+npm run build   # must pass before any git push
+npm start
 ```
 
 ---
@@ -188,76 +132,51 @@ GET  /analytics/routes                  List available routes
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `ANTHROPIC_API_KEY` | **Yes** | Claude API key |
-| `SUPABASE_URL` | **Yes** | Supabase project URL |
+| `DEEPSEEK_API_KEY` | **Yes** | DeepSeek Chat API key |
+| `NEXT_PUBLIC_SUPABASE_URL` | **Yes** | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | **Yes** | Supabase anon key (public) |
 | `SUPABASE_SERVICE_ROLE_KEY` | **Yes** | Service role key (server-side only) |
-| `AIS_API_KEY` | No | AISStream.io key (mock data used if absent) |
-| `SLACK_WEBHOOK_URL` | No | Delay alerts when probability > 70% |
-| `SMTP_*` | No | Email report delivery |
-
-See `.env.example` for the full list.
+| `AISSTREAM_API_KEY` | No | AISstream.io key for live AIS data |
+| `RESEND_API_KEY` | No | Email confirmation for bookings |
 
 ---
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│              Flutter App (web · Android · iOS)           │
-│     Dashboard · Chat · Compliance · Helpdesk · Analytics │
-│               Riverpod · go_router · fl_chart            │
-└──────────────────────┬──────────────────────────────────┘
-                       │  REST + SSE (Dio)
-          ┌────────────▼──────────────────────────────┐
-          │           FastAPI Backend                   │
-          │  /vessels /chat /reports /tickets           │
-          │  /compliance /analytics                     │
-          │  slowapi rate limiting (3 tiers)            │
-          └───────────┬──────────────┬─────────────────┘
-                      │              │
-          ┌───────────▼──────┐  ┌───▼──────────────────┐
-          │   Supabase Cloud  │  │  Anthropic Claude     │
-          │   PostgreSQL      │  │  claude-sonnet-4-...  │
-          │   Realtime        │  └──────────────────────┘
-          │   (vessels, chat, │
-          │    tickets)       │
-          └───────────────────┘
-                      │
-          ┌───────────▼───────────────────────────────┐
-          │  AIS API · ReportLab PDFs · Prophet · SMTP │
-          └────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────┐
+│          Next.js 14 App (Vercel Edge / Serverless)             │
+│  /book /vessels /chat /compliance /helpdesk /analytics          │
+│  /employees /maintenance /dashboard /health /audit              │
+│  ──────────────────────────────────────────────────             │
+│  src/middleware.ts  (rate limiting · OWASP headers · CSP)       │
+│  src/lib/validation.ts  (input sanitization at API boundaries)  │
+│  src/lib/i18n.ts  (20 languages · react-i18next)                │
+│  src/lib/realtime.ts  (Supabase Realtime WebSocket hooks)        │
+└──────────────┬──────────────────────────────┬──────────────────┘
+               │  Supabase SDK                 │  OpenAI-compat SDK
+   ┌───────────▼──────────────┐   ┌───────────▼───────────────┐
+   │  Supabase Cloud           │   │  DeepSeek API             │
+   │  PostgreSQL + pgBouncer   │   │  deepseek-chat model      │
+   │  Auth (email/password)    │   └───────────────────────────┘
+   │  Realtime (WebSocket)     │
+   └───────────────────────────┘
+               │
+   ┌───────────▼───────────────────────────────────────┐
+   │  AISstream.io  (wss://stream.aisstream.io/v0/stream) │
+   │  Live AIS vessel positions for Minoan fleet          │
+   └──────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Deployment
+## Deployment (Vercel)
 
-### Vercel (Flutter web)
+1. Connect repo to Vercel → auto-detects Next.js
+2. Set environment variables (Settings → Environment Variables)
+3. Deploy — Vercel handles builds, edge middleware, and CDN
 
-1. Connect repo to Vercel
-2. Set **Build Command:** `cd app && flutter build web --release --web-renderer canvaskit --dart-define=SUPABASE_URL=$SUPABASE_URL --dart-define=API_BASE_URL=$API_BASE_URL`
-3. Set **Output Directory:** `app/build/web`
-4. Add env vars: `SUPABASE_URL`, `API_BASE_URL`
-
-Or use GitHub Actions (`deploy.yml`) which builds and deploys automatically on push to `main`.
-
-### Railway (FastAPI backend)
-
-1. Create a Railway project, add a service pointing to the repo root
-2. Set root directory to `backend/`
-3. Railway auto-detects `Procfile`: `web: uvicorn main:app --host 0.0.0.0 --port $PORT --workers 2`
-4. Add all env vars from `.env.example` as Railway variables
-
-### GitHub Actions secrets required
-
-| Secret | Used by |
-|--------|---------|
-| `VERCEL_TOKEN` | deploy.yml — Flutter web |
-| `VERCEL_ORG_ID` | deploy.yml |
-| `VERCEL_PROJECT_ID` | deploy.yml |
-| `RAILWAY_TOKEN` | deploy.yml — FastAPI |
-| `SUPABASE_URL` | deploy.yml — build-time dart-define |
-| `API_BASE_URL` | deploy.yml — build-time dart-define |
+Push to `master` triggers automatic redeploy via Vercel GitHub integration.
 
 ---
 
@@ -276,8 +195,7 @@ Or use GitHub Actions (`deploy.yml`) which builds and deploys automatically on p
 
 - **Platform issues:** contact@integramindai.com
 - **Minoan Lines IT:** Michalis Orfanoudakis, IT Department Manager
-- **Anthropic Claude API:** console.anthropic.com
 
 ---
 
-*Built with Claude claude-sonnet-4-20250514 by IntegraMind AI · 2025*
+*Built with Claude Sonnet 4.6 by IntegraMind AI · 2026*
