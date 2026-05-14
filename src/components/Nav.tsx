@@ -23,11 +23,11 @@ export default function Nav() {
     { href: '/compliance', label: t('nav.compliance'), icon: FileText },
     { href: '/helpdesk', label: t('nav.helpdesk'), icon: Headphones },
     { href: '/analytics', label: t('nav.analytics'), icon: BarChart2 },
-    { href: '/employees', label: 'Crew', icon: Users },
-    { href: '/maintenance', label: 'Maintenance', icon: Wrench },
-    { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/health', label: 'Health', icon: Activity },
-    { href: '/audit', label: 'Audit', icon: Shield },
+    { href: '/employees', label: t('nav.crew'), icon: Users },
+    { href: '/maintenance', label: t('nav.maintenance'), icon: Wrench },
+    { href: '/dashboard', label: t('nav.dashboard'), icon: LayoutDashboard },
+    { href: '/health', label: t('nav.health'), icon: Activity },
+    { href: '/audit', label: t('nav.audit'), icon: Shield },
   ];
 
   const linkClass = (href: string) =>
